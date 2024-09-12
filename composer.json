@@ -6,7 +6,7 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.3.11",
+        "php": ">=8.2.12",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "doctrine/dbal": "^3",
@@ -19,6 +19,8 @@
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.1.*",
         "symfony/runtime": "7.1.*",
+        "symfony/security-bundle": "7.1.*",
+        "symfony/twig-bundle": "7.1.*",
         "symfony/yaml": "7.1.*"
     },
     "config": {
@@ -59,6 +61,12 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "docker-start": [
+            "docker compose up --pull always -d --wait"
+        ],
+        "docker-stop": [
+            "docker compose down"
         ]
     },
     "conflict": {
@@ -70,5 +78,9 @@
             "require": "7.1.*",
             "docker": true
         }
+    },
+    "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^3.6",
+        "symfony/maker-bundle": "^1.61"
     }
 }

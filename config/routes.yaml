@@ -1,5 +1,39 @@
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
+single_product_show_front:
+    path: /product/{id}
+    controller: App\Controller\ProductController::show
+    methods: ['GET']
+
+single_product_show:
+    path: /api/product/{id}
+    controller: App\Controller\ProductApiController::show
+    methods: ['GET']
+    format: json
+
+single_product_update:
+    path: /api/product/{id}
+    controller: App\Controller\ProductApiController::update
+    methods: ['PUT']
+    format: json
+
+single_product_patch:
+    path: /api/product/{id}
+    controller: App\Controller\ProductApiController::patch
+    methods: ['PATCH']
+    format: json
+
+single_product_delete:
+    path: /api/product/{id}
+    controller: App\Controller\ProductApiController::delete
+    methods: ['DELETE']
+    format: json
+
+single_product_create:
+    path: /api/product
+    controller: App\Controller\ProductApiController::create
+    methods: ['POST|PUT']
+    format: json
+
+list_products:
+    path: /api/products
+    controller: App\Controller\ProductApiController::list
+    methods: ['GET']
