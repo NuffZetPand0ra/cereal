@@ -4,7 +4,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{{ path('product_index') }}">All cerials</a>
+                <a href="{{ path('product_index') }}">Index of cerials</a>
             </li>
             <li class="breadcrumb-item">
                 <a href="{{ path('single_product_show', {'id': product.id}) }}">{{ product.name }}</a>
@@ -14,82 +14,123 @@
     </nav>
 {% endblock %}
 
-{% block title %}Single product edit{% endblock %}
+{% block title %}Editing {{ product.id }}: {{ product.name }}{% endblock %}
 
 {% block body %}
-<h1>{{ product.name }}</h1>
 <form method="post" action="{{ path('product_save') }}">
     <input type="hidden" name="id" value="{{ product.id }}">
-    <div class="mb-3 form-floating">
-        <input name="name" type="text" class="form-control" id="name-input" value="{{ product.name }}" placeholder="Name">
-        <label for="name-input" class="form-label">Name</label>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="name" type="text" class="form-control" id="name-input" value="{{ product.name }}" placeholder="Name">
+                <label for="name-input" class="form-label">Name</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <select name="mfr" class="form-select" id="mfr-input" placeholder="Manufacturer">
+                    {% for mfr in mfrs %}
+                        <option value="{{ mfr.id }}" {% if mfr.id == product.mfr.id %}selected{% endif %}>{{ mfr.name }} ({{ mfr.shorthand }})</option>
+                    {% endfor %}
+                </select>
+                <label for="mfr-input" class="form-label">Manufacturer</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <select name="type" class="form-select" id="type-input" placeholder="Type">
+                    {% for type in types %}
+                        <option value="{{ type.id }}" {% if type.id == product.type.id %}selected{% endif %}>{{ type.name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="type-input" class="form-label">Type</label>
+            </div>
+        </div>
     </div>
-    <div class="mb-3 form-floating">
-        <select name="mfr" class="form-select" id="mfr-input" placeholder="Manufacturer">
-            {% for mfr in mfrs %}
-                <option value="{{ mfr.id }}" {% if mfr.id == product.mfr.id %}selected{% endif %}>{{ mfr.name }} ({{ mfr.shorthand }})</option>
-            {% endfor %}
-        </select>
-        <label for="mfr-input" class="form-label">Manufacturer</label>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="calories" type="number" class="form-control" id="calories-input" value="{{ product.calories }}" placeholder="Calories">
+                <label for="calories-input" class="form-label">Calories</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="protein" type="number" class="form-control" id="protein-input" value="{{ product.protein }}" placeholder="Protein">
+                <label for="protein-input" class="form-label">Protein</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="fat" type="number" class="form-control" id="fat-input" value="{{ product.fat }}" placeholder="Fat">
+                <label for="fat-input" class="form-label">Fat</label>
+            </div>
+        </div>
     </div>
-    <div class="mb-3 form-floating">
-        <select name="type" class="form-select" id="type-input" placeholder="Type">
-            {% for type in types %}
-                <option value="{{ type.id }}" {% if type.id == product.type.id %}selected{% endif %}>{{ type.name }}</option>
-            {% endfor %}
-        </select>
-        <label for="type-input" class="form-label">Type</label>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="sodium" type="number" class="form-control" id="sodium-input" value="{{ product.sodium }}" placeholder="Sodium">
+                <label for="sodium-input" class="form-label">Sodium</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="fiber" type="number" class="form-control" id="fiber-input" value="{{ product.fiber }}" placeholder="Fiber">
+                <label for="fiber-input" class="form-label">Fiber</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="carbo" type="number" class="form-control" id="carbo-input" value="{{ product.carbo }}" placeholder="Carbs">
+                <label for="carbo-input" class="form-label">Carbs</label>
+            </div>
+        </div>
     </div>
-    <div class="mb-3 form-floating">
-        <input name="calories" type="number" class="form-control" id="calories-input" value="{{ product.calories }}" placeholder="Calories">
-        <label for="calories-input" class="form-label">Calories</label>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="sugars" type="number" class="form-control" id="sugars-input" value="{{ product.sugars }}" placeholder="Sugars">
+                <label for="sugars-input" class="form-label">Sugars</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="potass" type="number" class="form-control" id="potass-input" value="{{ product.potass }}" placeholder="Potassium">
+                <label for="potass-input" class="form-label">Potassium</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="vitamins" type="number" class="form-control" id="vitamins-input" value="{{ product.vitamins }}" placeholder="Vitamins">
+                <label for="vitamins-input" class="form-label">Vitamins</label>
+            </div>
+        </div>
     </div>
-    <div class="mb-3 form-floating">
-        <input name="protein" type="number" class="form-control" id="protein-input" value="{{ product.protein }}" placeholder="Protein">
-        <label for="protein-input" class="form-label">Protein</label>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="shelf" type="number" class="form-control" id="shelf-input" value="{{ product.shelf }}" placeholder="Shelf">
+                <label for="shelf-input" class="form-label">Shelf</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="weight" type="number" class="form-control" id="weight-input" value="{{ product.weight }}" placeholder="Weight">
+                <label for="weight-input" class="form-label">Weight</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3 form-floating">
+                <input name="cups" type="number" class="form-control" id="cups-input" value="{{ product.cups }}" placeholder="Cups">
+                <label for="cups-input" class="form-label">Cups</label>
+            </div>
+        </div>
     </div>
-    <div class="mb-3 form-floating">
-        <input name="fat" type="number" class="form-control" id="fat-input" value="{{ product.fat }}" placeholder="Fat">
-        <label for="fat-input" class="form-label">Fat</label>
+    <div class="btn-group">
+        <button type="submit" class="btn btn-success">Save edits</button>
+        <a href="{{ path('single_product_show', {id: product.id}) }}" class="btn btn-secondary">See product</a>
+        <a href="{{ path('single_product_delete', {id: product.id}) }}" class="btn btn-danger">Delete</a>
     </div>
-    <div class="mb-3 form-floating">
-        <input name="sodium" type="number" class="form-control" id="sodium-input" value="{{ product.sodium }}" placeholder="Sodium">
-        <label for="sodium-input" class="form-label">Sodium</label>
-    </div>
-    <div class="mb-3 form-floating">
-        <input name="fiber" type="number" class="form-control" id="fiber-input" value="{{ product.fiber }}" placeholder="Fiber">
-        <label for="fiber-input" class="form-label">Fiber</label>
-    </div>
-    <div class="mb-3 form-floating">
-        <input name="carbo" type="number" class="form-control" id="carbo-input" value="{{ product.carbo }}" placeholder="Carbs">
-        <label for="carbo-input" class="form-label">Carbs</label>
-    </div>
-    <div class="mb-3 form-floating">
-        <input name="sugars" type="number" class="form-control" id="sugars-input" value="{{ product.sugars }}" placeholder="Sugars">
-        <label for="sugars-input" class="form-label">Sugars</label>
-    </div>
-    <div class="mb-3 form-floating">
-        <input name="potass" type="number" class="form-control" id="potass-input" value="{{ product.potass }}" placeholder="Potassium">
-        <label for="potass-input" class="form-label">Potassium</label>
-    </div>
-    <div class="mb-3 form-floating">
-        <input name="vitamins" type="number" class="form-control" id="vitamins-input" value="{{ product.vitamins }}" placeholder="Vitamins">
-        <label for="vitamins-input" class="form-label">Vitamins</label>
-    </div>
-    <div class="mb-3 form-floating">
-        <input name="shelf" type="number" class="form-control" id="shelf-input" value="{{ product.shelf }}" placeholder="Shelf">
-        <label for="shelf-input" class="form-label">Shelf</label>
-    </div>
-    <div class="mb-3 form-floating">
-        <input name="weight" type="number" class="form-control" id="weight-input" value="{{ product.weight }}" placeholder="Weight">
-        <label for="weight-input" class="form-label">Weight</label>
-    </div>
-    <div class="mb-3 form-floating">
-        <input name="cups" type="number" class="form-control" id="cups-input" value="{{ product.cups }}" placeholder="Cups">
-        <label for="cups-input" class="form-label">Cups</label>
-    </div>
-    <button type="submit" class="btn btn-primary">Save edits</button>
-    <a href="{{ path('single_product_show', {id: product.id}) }}" class="btn btn-primary">See product</a>
 </form>
-
 {% endblock %}

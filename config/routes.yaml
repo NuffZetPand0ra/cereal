@@ -14,6 +14,11 @@ single_product_edit:
     controller: App\Controller\ProductController::edit
     methods: ['GET']
 
+single_product_delete:
+    path: /product/{id}/delete
+    controller: App\Controller\ProductController::delete
+    methods: ['GET|POST|DELETE']
+
 product_save:
     path: /product/save
     controller: App\Controller\ProductController::save

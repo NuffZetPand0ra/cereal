@@ -6,7 +6,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{{ path('product_index') }}">All cerials</a>
+                <a href="{{ path('product_index') }}">Index of Cereals</a>
             </li>
             <li class="breadcrumb-item active">{{ product.name }}</li>
         </ol>
@@ -26,7 +26,6 @@
 {% endblock %}
 
 {% block body %}
-<h1>{{ product.id }}: {{ product.name }}</h1>
 <table class="table table-striped table-hover">
     <tbody>
         <tr>
@@ -91,5 +90,9 @@
         </tr>
     </tbody>
 </table>
-<a href="{{ path('single_product_edit', {id: product.id}) }}" class="btn btn-primary">Edit</a>
+<div class="btn-group">
+    <a href="{{ path('single_product_edit', {id: product.id}) }}" class="btn btn-primary">Edit</a>
+    <a href="{{ path('single_product_delete', {id: product.id}) }}" class="btn btn-danger">Delete</a>
+</div>
+
 {% endblock %}
