@@ -121,3 +121,5 @@ class ProductApiController extends AbstractController
         return $response;
     }
 }
+
+# /products?weight={>=100}

@@ -7,6 +7,7 @@ use App\Entity\Manufacturer;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -63,15 +64,19 @@ class Product
     #[ORM\Column]
     private ?float $cups = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?float $rating = null;
+    // #[ORM\Column(nullable: true)]
+    // private ?float $rating = null;
 
     /**
      * @var ArrayCollection<int, ProductRating>
      */
     #[ORM\OneToMany(targetEntity: ProductRating::class, mappedBy: 'product')]
-    #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id')]
-    private ?ArrayCollection $productRating = null;
+    private ?Collection $product_ratings = null;
+
+    public function __construct()
+    {
+        $this->product_ratings = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -258,17 +263,17 @@ class Product
         return $this;
     }
 
-    public function getRating(): ?float
-    {
-        return $this->rating;
-    }
+    // public function getRating(): ?float
+    // {
+    //     return $this->rating;
+    // }
 
-    public function setRating(?float $rating): static
-    {
-        $this->rating = $rating;
+    // public function setRating(?float $rating): static
+    // {
+    //     $this->rating = $rating;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     /**
      * 
@@ -276,12 +281,12 @@ class Product
      */
     public function getProductRatings(): ?ArrayCollection
     {
-        return $this->productRating;
+        return $this->product_ratings;
     }
 
     public function getAverageProductRating(): ?float
     {
-        $ratings = $this->productRating;
+        $ratings = $this->product_ratings;
         if($ratings === null || count($ratings) === 0) {
             return null;
         }
@@ -296,7 +301,7 @@ class Product
 
     public function addProductRating(ProductRating $productRating): static
     {
-        $this->productRating[] = $productRating;
+        $this->product_ratings[] = $productRating;
 
         return $this;
     }

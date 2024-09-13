@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Single product edit{% endblock %}
+
+{% block body %}
+<h1>{{ product.name }}</h1>
+<form method="post">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input name="name" type="text" class="form-control" id="name" value="{{ product.name }}">
+    </div>
+    <div class="mb-3">
+        <label for="calories" class="form-label">Calories</label>
+        <input name="calories" type="number" class="form-control" id="calories" value="{{ product.calories }}">
+    </div>
+    <div class="mb-3">
+        <label for="protein" class="form-label">Protein</label>
+        <input name="protein" type="number" class="form-control" id="protein" value="{{ product.protein }}">
+    </div>
+    <div class="mb-3">
+        <label for="fat" class="form-label">Fat</label>
+        <input name="fat" type="number" class="form-control" id="fat" value="{{ product.fat }}">
+    </div>
+    <div class="mb-3">
+        <label for="sodium" class="form-label">Sodium</label>
+        <input name="sodium" type="number" class="form-control" id="sodium" value="{{ product.sodium }}">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save edits</button>
+    <a href="{{ path('single_product_show', {id: product.id}) }}" class="btn btn-primary">See product</a>
+</form>
+
+{% endblock %}

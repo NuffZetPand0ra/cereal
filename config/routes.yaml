@@ -1,39 +1,49 @@
-single_product_show_front:
+#Frontend routes
+list_products:
+    path: /products
+    controller: App\Controller\ProductController::index
+
+single_product_show:
     path: /product/{id}
     controller: App\Controller\ProductController::show
     methods: ['GET']
 
-single_product_show:
+single_product_edit:
+    path: /product/{id}/edit
+    controller: App\Controller\ProductController::edit
+
+# Api routes
+api_single_product_show:
     path: /api/product/{id}
     controller: App\Controller\ProductApiController::show
     methods: ['GET']
     format: json
 
-single_product_update:
+api_single_product_update:
     path: /api/product/{id}
     controller: App\Controller\ProductApiController::update
     methods: ['PUT']
     format: json
 
-single_product_patch:
+api_single_product_patch:
     path: /api/product/{id}
     controller: App\Controller\ProductApiController::patch
     methods: ['PATCH']
     format: json
 
-single_product_delete:
+api_single_product_delete:
     path: /api/product/{id}
     controller: App\Controller\ProductApiController::delete
     methods: ['DELETE']
     format: json
 
-single_product_create:
+api_single_product_create:
     path: /api/product
     controller: App\Controller\ProductApiController::create
     methods: ['POST|PUT']
     format: json
 
-list_products:
+api_list_products:
     path: /api/products
     controller: App\Controller\ProductApiController::list
     methods: ['GET']

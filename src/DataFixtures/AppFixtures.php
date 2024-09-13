@@ -25,8 +25,8 @@ class AppFixtures extends Fixture
         $products = $csv_parser->getAllProducts();
         foreach($products as $product){
             $product
-                ->setMfr($manager->getRepository(Manufacturer::class)->findOneBy(['shorthand' => $product->getMfr()->getShorthand()]))
-                ->setType($manager->getRepository(ProductType::class)->findOneBy(['shorthand' => $product->getType()->getShorthand()]));
+                ->setMfr($manager->getRepository(Manufacturer::class)->findOneByShorthand($product->getMfr()->getShorthand()))
+                ->setType($manager->getRepository(ProductType::class)->findOneByShorthand($product->getType()->getShorthand()));
             $manager->persist($product);
         }
         $manager->flush();

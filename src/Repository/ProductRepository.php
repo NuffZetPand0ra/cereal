@@ -20,14 +20,29 @@ class ProductRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('p');
 
+        $valid_keys = ['calories', 'protein', 'fat', 'sodium', 'fiber', 'carbo', 'sugars', 'potass', 'vitamins', 'shelf', 'weight', 'cups'];
         foreach ($filters as $key => $value) {
-            if(!in_array($key, ['calories', 'protein', 'fat', 'sodium', 'fiber', 'carbo', 'sugars', 'potass', 'vitamins', 'shelf', 'weight', 'cups'])){
+            if($key == 'sort'){
+                continue;
+            }
+            if(!in_array($key, $valid_keys)){
                 throw new \InvalidArgumentException("Invalid filter key: $key");
             }
             $operator = preg_match('/^(\w+)([<>=!])$/', $key, $matches) ? $matches[2] : '=';
             $numeric_value = preg_match('/^\d+$/', $value) ? $value : null;	
+            if(!in_array($operator, ['<', '>', '=', '!=', '<=', '>='])){
+                throw new \InvalidArgumentException("Invalid operator for $key: $operator");
+            }
             $qb->andWhere("p.$key $operator :$key")
                 ->setParameter($key, $numeric_value);
+        }
+
+        if(isset($filters['sort'])){
+            $sort = $filters['sort'];
+            if(!in_array($sort, $valid_keys)){
+                throw new \InvalidArgumentException("Invalid sort key: $sort");
+            }
+            $qb->orderBy("p.$sort");
         }
 
         return $qb->getQuery()->getResult();
