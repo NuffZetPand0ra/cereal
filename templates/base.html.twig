@@ -12,21 +12,41 @@
     </head>
     <body>
         <div class="col-lg-8 mx-auto p-4 py-md-5">
+        
             <header class="d-flex align-items-center pb-3 mb-5 border-bottom">
                 {% block header %}
                     <h1>{{ block('title') }}</h1>
                 {% endblock %}
             </header>
+
             {% block breadcrumb %}{% endblock %}
-            {% block messages %}{% endblock %}
+
             <main>
                 {% block body %}{% endblock %}
             </main>
+
             <footer class="pt-5 my-5 text-body-secondary border-top">
                 {% block footer %}
                     <p>Data appearing in this app have not been verified.</p>
                 {% endblock %}
             </footer>
+
+            {% block messages %}
+                {% if app.request.hasPreviousSession %}
+                    <div class="toast-container position-fixed top-0 end-0 p-3">
+                        {% for success in app.flashes('success') %}
+                            <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="toast-header">
+                                    <strong class="me-auto">Success</strong>
+                                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                                <div class="toast-body">{{ success }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endblock %}
+
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
