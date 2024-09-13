@@ -2,6 +2,7 @@
 product_index:
     path: /products
     controller: App\Controller\ProductController::index
+    methods: ['GET']
 
 single_product_show:
     path: /product/{id}
@@ -11,6 +12,12 @@ single_product_show:
 single_product_edit:
     path: /product/{id}/edit
     controller: App\Controller\ProductController::edit
+    methods: ['GET']
+
+product_save:
+    path: /product/save
+    controller: App\Controller\ProductController::save
+    methods: ['POST']
 
 # Api routes
 api_single_product_show:

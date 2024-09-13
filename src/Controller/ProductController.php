@@ -47,13 +47,31 @@ class ProductController extends AbstractController
 
     public function save(Request $r, EntityManagerInterface $em) : Response
     {
-        $product = (new Product())
+        if($r->get('id')) {
+            $product = $em->getRepository(Product::class)->find($r->get('id'));
+        } else {
+            $product = new Product();
+        }
+        $product
             ->setName($r->get('name'))
-            ->setMfr((new Manufacturer())->setName($r->get('mfr_name'))->setShorthand($r->get('mfr_shorthand')))
-            ->setType((new ProductType())->setName($r->get('type_name'))->setShorthand($r->get('type_shorthand')))
-            ->setCalories($r->get('calories'));
+            ->setMfr($em->getRepository(Manufacturer::class)->find($r->get('mfr')))
+            ->setType($em->getRepository(ProductType::class)->find($r->get('type')))
+            ->setCalories($r->get('calories'))
+            ->setProtein($r->get('protein'))
+            ->setFat($r->get('fat'))
+            ->setSodium($r->get('sodium'))
+            ->setFiber($r->get('fiber'))
+            ->setCarbo($r->get('carbo'))
+            ->setSugars($r->get('sugars'))
+            ->setPotass($r->get('potass'))
+            ->setVitamins($r->get('vitamins'))
+            ->setShelf($r->get('shelf'))
+            ->setWeight($r->get('weight'))
+            ->setCups($r->get('cups'));
+
         $em->persist($product);
         $em->flush();
-        return $this->redirectToRoute('product_show', ['id' => $product->getId()]);
+        $this->addFlash('success', 'Product saved');
+        return $this->redirectToRoute('single_product_show', ['id' => $product->getId()]);
     }
 }
