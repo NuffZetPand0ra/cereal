@@ -25,6 +25,38 @@
         <label for="sodium" class="form-label">Sodium</label>
         <input name="sodium" type="number" class="form-control" id="sodium" value="{{ product.sodium }}">
     </div>
+    <div class="mb-3">
+        <label for="fiber" class="form-label">Fiber</label>
+        <input name="fiber" type="number" class="form-control" id="fiber" value="{{ product.fiber }}">
+    </div>
+    <div class="mb-3">
+        <label for="carbo" class="form-label">Carbs</label>
+        <input name="carbo" type="number" class="form-control" id="carbo" value="{{ product.carbo }}">
+    </div>
+    <div class="mb-3">
+        <label for="sugars" class="form-label">Sugars</label>
+        <input name="sugars" type="number" class="form-control" id="sugars" value="{{ product.sugars }}">
+    </div>
+    <div class="mb-3">
+        <label for="potass" class="form-label">Potassium</label>
+        <input name="potass" type="number" class="form-control" id="potass" value="{{ product.potass }}">
+    </div>
+    <div class="mb-3">
+        <label for="vitamins" class="form-label">Vitamins</label>
+        <input name="vitamins" type="number" class="form-control" id="vitamins" value="{{ product.vitamins }}">
+    </div>
+    <div class="mb-3">
+        <label for="shelf" class="form-label">Shelf</label>
+        <input name="shelf" type="number" class="form-control" id="shelf" value="{{ product.shelf }}">
+    </div>
+    <div class="mb-3">
+        <label for="weight" class="form-label">Weight</label>
+        <input name="weight" type="number" class="form-control" id="weight" value="{{ product.weight }}">
+    </div>
+    <div class="mb-3">
+        <label for="cups" class="form-label">Cups</label>
+        <input name="cups" type="number" class="form-control" id="cups" value="{{ product.cups }}">
+    </div>
 
     <button type="submit" class="btn btn-primary">Save edits</button>
     <a href="{{ path('single_product_show', {id: product.id}) }}" class="btn btn-primary">See product</a>
