@@ -1,5 +1,19 @@
 {% extends 'base.html.twig' %}
 
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ path('product_index') }}">All cerials</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ path('single_product_show', {'id': product.id}) }}">{{ product.name }}</a>
+            </li>
+            <li class="breadcrumb-item active">Edit</li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block title %}Single product edit{% endblock %}
 
 {% block body %}
@@ -8,6 +22,22 @@
     <div class="mb-3">
         <label for="name" class="form-label">Name</label>
         <input name="name" type="text" class="form-control" id="name" value="{{ product.name }}">
+    </div>
+    <div class="mb-3">
+        <label for="mfr" class="form-label">Manufacturer</label>
+        <select name="mfr" class="form-select" id="mfr">
+            {% for mfr in mfrs %}
+                <option value="{{ mfr.id }}" {% if mfr.id == product.mfr.id %}selected{% endif %}>{{ mfr.name }} ({{ mfr.shorthand }})</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="type" class="form-label">Type</label>
+        <select name="type" class="form-select" id="type">
+            {% for type in types %}
+                <option value="{{ type.id }}" {% if type.id == product.type.id %}selected{% endif %}>{{ type.name }}</option>
+            {% endfor %}
+        </select>
     </div>
     <div class="mb-3">
         <label for="calories" class="form-label">Calories</label>

@@ -1,5 +1,5 @@
 #Frontend routes
-list_products:
+product_index:
     path: /products
     controller: App\Controller\ProductController::index
 

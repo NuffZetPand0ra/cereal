@@ -1,5 +1,16 @@
 {% extends 'base.html.twig' %}
 
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ path('product_index') }}">All cerials</a>
+            </li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
 {% block title %}Single product show{% endblock %}
 
 {% block body %}

@@ -17,11 +17,6 @@ class ProductController extends AbstractController
     public function show(int $id, EntityManagerInterface $em): Response
     {
         $product = $em->getRepository(Product::class)->find($id);
-        // $product = (new Product())
-        //     ->setName('My cereal product')
-        //     ->setMfr((new Manufacturer())->setName('My manufacturer')->setShorthand('M'))
-        //     ->setType((new ProductType())->setName('My product type')->setShorthand('T'))
-        //     ->setCalories(100);
         return $this->render('product/single.html.twig', [
             'controller_name' => 'ProductController',
             'product' => $product,
@@ -29,26 +24,24 @@ class ProductController extends AbstractController
         ]);
     }
 
-    public function index(): Response
+    public function index(EntityManagerInterface $em): Response
     {
-        exit("Product list comes here");
+        $products = $em->getRepository(Product::class)->findAll();
         return $this->render('product/index.html.twig', [
             'controller_name' => 'ProductController',
+            'products' => $products,
         ]);
     }
     public function edit(int $id, EntityManagerInterface $em): Response
     {
-        // $product = (new Product())
-        //     ->setName('My cereal product')
-        //     ->setMfr((new Manufacturer())->setName('My manufacturer')->setShorthand('M'))
-        //     ->setType((new ProductType())->setName('My product type')->setShorthand('T'))
-        //     ->setCalories(100);
-        // $em->persist($product);
-        // $em->flush();
         $product = $em->getRepository(Product::class)->find($id);
+        $manufacturers = $em->getRepository(Manufacturer::class)->findAll();
+        $types = $em->getRepository(ProductType::class)->findAll();
         return $this->render('product/edit.html.twig', [
             'controller_name' => 'ProductController',
             'product' => $product,
+            'mfrs' => $manufacturers,
+            'types' => $types,
         ]);
     }
 
