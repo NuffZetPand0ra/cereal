@@ -35,7 +35,7 @@ To set up and run this project locally, follow these steps:
 
 5. **(Optional) Load in the data fixtures to populate the database with starting data**:
     ```sh
-    docker exec cereal-php-1 php bin/console docktrine:fixtures:load --no-interaction
+    docker exec cereal-php-1 php bin/console doctrine:fixtures:load --no-interaction
     ```
 
 ## Usage
