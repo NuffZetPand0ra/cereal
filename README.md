@@ -28,6 +28,16 @@ To set up and run this project locally, follow these steps:
 	docker compose up --pull always -d --wait
 	```
 
+4. **Run database migration to set up schema**:
+    ```sh
+    docker exec cereal-php-1 php bin/console doctrine:migrations:migrate --no-interaction
+    ```
+
+5. **(Optional) Load in the data fixtures to populate the database with starting data**:
+    ```sh
+    docker exec cereal-php-1 php bin/console docktrine:fixtures:load --no-interaction
+    ```
+
 ## Usage
 
 Once the Docker containers are up and running, open your web browser and navigate to:
