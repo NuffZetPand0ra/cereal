@@ -78,4 +78,17 @@ class ProductController extends AbstractController
         $this->addFlash('success', 'Product saved');
         return $this->redirectToRoute('single_product_show', ['id' => $product->getId()]);
     }
+
+    public function delete(int $id, EntityManagerInterface $em) : Response
+    {
+        $product = $em->getRepository(Product::class)->find($id);
+        if(!$product) {
+            $this->addFlash('error', 'Product not found');
+            return $this->redirectToRoute('product_index');
+        }
+        $em->remove($product);
+        $em->flush();
+        $this->addFlash('success', 'Product deleted');
+        return $this->redirectToRoute('product_index');
+    }
 }
