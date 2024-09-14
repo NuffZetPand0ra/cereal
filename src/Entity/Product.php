@@ -277,27 +277,27 @@ class Product
 
     /**
      * 
-     * @return null|ArrayCollection<int, ProductRating>
+     * @return null|Collection<int, ProductRating>
      */
-    public function getProductRatings(): ?ArrayCollection
-    {
-        return $this->product_ratings;
-    }
+    // public function getProductRatings(): ?Collection
+    // {
+    //     return $this->product_ratings;
+    // }
 
-    public function getAverageProductRating(): ?float
-    {
-        $ratings = $this->product_ratings;
-        if($ratings === null || count($ratings) === 0) {
-            return null;
-        }
-        $total = 0;
-        $count = 0;
-        foreach ($ratings as $rating) {
-            $total += $rating->getRating();
-            $count++;
-        }
-        return $total / $count;
-    }
+    // public function getAverageProductRating(): ?float
+    // {
+    //     $ratings = $this->product_ratings;
+    //     if($ratings === null || count($ratings) === 0) {
+    //         return null;
+    //     }
+    //     $total = 0;
+    //     $count = 0;
+    //     foreach ($ratings as $rating) {
+    //         $total += $rating->getRating();
+    //         $count++;
+    //     }
+    //     return $total / $count;
+    // }
 
     public function addProductRating(ProductRating $productRating): static
     {

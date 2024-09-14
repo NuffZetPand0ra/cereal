@@ -12,7 +12,7 @@ use App\Model\ProductDto;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 
-class ProductApiController extends AbstractController
+class ProductApiController extends AbstractApiController
 {
     public function show(int $id, EntityManagerInterface $em) : Response
     {
@@ -22,7 +22,7 @@ class ProductApiController extends AbstractController
                 throw new \Exception("Product not found");
             }
             $response = new Response(
-                content: json_encode($product),
+                content: $this->jsonSerialize($product),
                 headers: ['Content-Type' => 'application/json'],
                 status: 200
             );
@@ -44,7 +44,7 @@ class ProductApiController extends AbstractController
         try{
             $em->flush();
             $response = new Response(
-                content: json_encode($product),
+                content: $this->jsonSerialize($product),
                 headers: ['Content-Type' => 'application/json'],
                 status: 200
             );
@@ -66,7 +66,7 @@ class ProductApiController extends AbstractController
         try{
             $em->flush();
             $response = new Response(
-                content: json_encode($product),
+                content: $this->jsonSerialize($product),
                 headers: ['Content-Type' => 'application/json'],
                 status: 201
             );
