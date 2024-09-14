@@ -1,4 +1,11 @@
 #Frontend routes
+root:
+    path: /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
+    defaults:
+        route: product_index
+        permanent: false
+
 product_index:
     path: /products
     controller: App\Controller\ProductController::index
