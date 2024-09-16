@@ -11,6 +11,11 @@ product_index:
     controller: App\Controller\ProductController::index
     methods: ['GET']
 
+single_product_create:
+    path: /product/create
+    controller: App\Controller\ProductController::create
+    methods: ['GET']
+
 single_product_show:
     path: /product/{id}
     controller: App\Controller\ProductController::show

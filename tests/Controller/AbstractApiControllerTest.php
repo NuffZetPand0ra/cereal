@@ -15,15 +15,15 @@ class AbstractApiControllerTest extends TestCase
         $this->_apiController = new class extends AbstractApiController {};
     }
 
-    public function testCanSerialize(): void
+    public function testCanSerializeObject(): void
     {
         $this->assertEquals('{"foo":"bar"}', $this->_apiController->jsonSerialize(['foo' => 'bar']));
     }
     
     /**
-     * @depends testCanSerialize
+     * @depends testCanSerializeObject
      */
-    public function testCanDeserialize(): void
+    public function testCanDeserializeJson(): void
     {
         // Arrange
         $product = new Product();
@@ -36,7 +36,7 @@ class AbstractApiControllerTest extends TestCase
         $this->assertEquals($product, $deserialized);
     }
 
-    public function testCanDeserializeWithInvalidJson(): void
+    public function testThrowsErrorOnInvalidJson(): void
     {
         $this->expectException(\Exception::class);
         $this->_apiController->jsonDeserialize('{"name":"', Product::class);
