@@ -73,6 +73,12 @@ class Product
     #[ORM\OneToMany(targetEntity: ProductRating::class, mappedBy: 'product')]
     private ?Collection $product_ratings = null;
 
+    /**
+     * @var ArrayCollection<int, ProductImage>
+     */
+    #[ORM\OneToMany(targetEntity: ProductImage::class, mappedBy: 'product_id')]
+    private ?Collection $product_images = null;
+
     public function __construct()
     {
         $this->product_ratings = new ArrayCollection();
@@ -304,5 +310,10 @@ class Product
         $this->product_ratings[] = $productRating;
 
         return $this;
+    }
+
+    public function getProductImages(): ?Collection
+    {
+        return $this->product_images;
     }
 }
