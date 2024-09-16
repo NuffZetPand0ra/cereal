@@ -8,6 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -76,7 +78,8 @@ class Product
     /**
      * @var ArrayCollection<int, ProductImage>
      */
-    #[ORM\OneToMany(targetEntity: ProductImage::class, mappedBy: 'product_id')]
+    #[Groups(['single_product_show'])]
+    #[ORM\OneToMany(targetEntity: ProductImage::class, mappedBy: 'product')]
     private ?Collection $product_images = null;
 
     public function __construct()
@@ -312,8 +315,9 @@ class Product
         return $this;
     }
 
-    public function getProductImages(): ?Collection
-    {
-        return $this->product_images;
-    }
+    // TODO: Make sure this avoids circular references
+    // public function getProductImages(): ?Collection
+    // {
+    //     return $this->product_images;
+    // }
 }
