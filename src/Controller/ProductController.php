@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Manufacturer;
 use App\Entity\Product;
+use App\Entity\ProductImage;
 use App\Entity\ProductType;
 use App\Service\ProductFilterService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,10 +31,15 @@ class ProductController extends AbstractController
         if(!$product) {
             throw $this->createNotFoundException('Product with id '.$id.' not found');
         }
+        $image = $em->getRepository(ProductImage::class)->findOneBy(['product' => $product]);
+        $image_base64 = base64_encode(stream_get_contents($image->getImageData()));
+        // var_dump(base64_encode(stream_get_contents($image->getImageData())));exit;
         return $this->render('product/single.html.twig', [
             'controller_name' => 'ProductController',
             'product' => $product,
             'id' => $id,
+            'image' => $image,
+            'image_base64' => $image_base64,
         ]);
     }
 
@@ -105,11 +111,15 @@ class ProductController extends AbstractController
     public function delete(int $id, EntityManagerInterface $em) : Response
     {
         $product = $em->getRepository(Product::class)->find($id);
+        $product_image = $em->getRepository(ProductImage::class)->findOneBy(['product' => $product]);
         if(!$product) {
             $this->addFlash('error', 'Product with id '.$id.' not found');
             return $this->redirectToRoute('product_index');
         }try{
             $em->remove($product);
+            if($product_image) {
+                $em->remove($product_image);
+            }
             $em->flush();
             $this->addFlash('success', "Deleted product ".$product->getName());
             return $this->redirectToRoute('product_index');
