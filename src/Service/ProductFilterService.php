@@ -13,6 +13,16 @@ class ProductFilterService
         $parsedFilters = [];
 
         foreach ($filters as $key => $expression) {
+            if (strpos($key, '_') !== false) {
+                $lastUnderscoreIndex = strrpos($key, '_');
+                $lastPart = substr($key, $lastUnderscoreIndex + 1);
+                if (is_numeric($lastPart)) {
+                    $key = substr($key, 0, $lastUnderscoreIndex);
+                }
+            }
+            if(strlen($expression) == 0){
+                continue;
+            }
             if (strpos($expression, '..') !== false) {
                 // Handle range operator '..'
                 $rangeParts = explode('..', $expression);

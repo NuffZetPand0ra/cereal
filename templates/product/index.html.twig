@@ -11,22 +11,40 @@
 {% endblock %}
 
 {% block body %}
-    {% if products|length == 0 %}
+    {% if filters|length > 0 %}
         <div class="alert alert-info" role="alert">
-            No cereals found.
+            <p>Showing cereals with the following criteria:</p>
+            {% for filter in filters %}
+                {% if filter.key == 'order' %}
+                    <p>Ordered by <strong>{{ filter.value }}</strong> in <strong>{{ filter.operator == ">" ? "descending" : "ascending" }}</strong> order</p>
+                {% endif %}
+            {% endfor %}
+            <ul>
+                {% for filter in filters %}
+                    {% if filter.key != 'order' %}
+                        <li>{{ filter.key }} {{ filter.operator }} {{ filter.value }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    {% if products|length == 0 %}
+        <div class="alert alert-warning" role="alert">
+            No cereals found{% if filters|length > 0 %} with the set criteria{% endif %}.
         </div>
     {% else %}
+        <h4>Found {{ products|length }} cereals</h4>
+        <div class="mb-2">
+            <a class="btn btn-primary" href="{{ path('single_product_create') }}">Create new cereal</a>
+        </div>
         <ul class="list-group list-group-flush">
-            <div class="mb-2">
-                <a class="btn btn-primary" href="{{ path('single_product_create') }}">Create new cereal</a>
-            </div>
             {% for product in products %}
             <li class="list-group-item d-flex justify-content-between align-items-center list-group-item-action">
                 {{ product.name }}
                 <div class="btn-group">
-                    <a href="{{ path('single_product_show', {'id': product.id}) }}" class="btn btn-sm btn-outline-primary">Show</a>
-                    <a href="{{ path('single_product_edit', {'id': product.id}) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                    <a href="{{ path('single_product_delete', {'id': product.id}) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+                    <a href="{{ path('single_product_show', {'id': product.id}) }}" class="btn btn-sm btn-primary">Show</a>
+                    <a href="{{ path('single_product_edit', {'id': product.id}) }}" class="btn btn-sm btn-secondary">Edit</a>
+                    <a href="{{ path('single_product_delete', {'id': product.id}) }}" class="btn btn-sm btn-danger">Delete</a>
                 </div>
             </li>
             {% endfor %}

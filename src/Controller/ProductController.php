@@ -16,11 +16,11 @@ class ProductController extends AbstractController
     public function index(Request $r, EntityManagerInterface $em, ProductFilterService $productFilterService): Response
     {
         $filters = $productFilterService->parseFilters($r);
-        // var_dump($filters);exit;
-        $products = $em->getRepository(Product::class)->findWithFilters($r->query->all());
+        $products = $em->getRepository(Product::class)->findWithFilters($filters);
         return $this->render('product/index.html.twig', [
             'controller_name' => 'ProductController',
             'products' => $products,
+            'filters' => $filters,
         ]);
     }
     

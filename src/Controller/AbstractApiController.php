@@ -8,6 +8,7 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 abstract class AbstractApiController extends AbstractController
 {
@@ -26,8 +27,14 @@ abstract class AbstractApiController extends AbstractController
     private function getSerializer(): Serializer
     {
         if(!$this->_serializer){
-            $encoders = [new JsonEncoder(), new XmlEncoder()];
+            // $default_context = [
+            //     AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object, $format, $context) {
+            //         return $object->getId();
+            //     }
+            // ];
+            $encoders = [new JsonEncoder()];
             $normalizers = [new ObjectNormalizer()];
+            // $normalizers = [new ObjectNormalizer(defaultContext: $default_context)];
             $this->_serializer = new Serializer($normalizers, $encoders);
         }
         return $this->_serializer;
