@@ -21,10 +21,36 @@ class ProductController extends AbstractController
     {
         $filters = $productFilterService->parseFiltersFromArray($this->buildIndexFilterQuery($r));
         $products = $em->getRepository(Product::class)->findWithFilters($filters);
+        $currentView = strtolower((string) $r->query->get('view', 'list'));
+        if (!in_array($currentView, ['list', 'grid'], true)) {
+            $currentView = 'list';
+        }
+
+        $productImages = [];
+        foreach ($products as $product) {
+            $image = $em->getRepository(ProductImage::class)->findOneBy(['product' => $product]);
+            if (!$image) {
+                continue;
+            }
+
+            $imageData = $image->getImageData();
+            $imageBinary = is_resource($imageData) ? stream_get_contents($imageData) : $imageData;
+            if (!$imageBinary) {
+                continue;
+            }
+
+            $productImages[$product->getId()] = [
+                'mimeType' => $image->getMimeType(),
+                'base64' => base64_encode($imageBinary),
+            ];
+        }
+
         return $this->render('product/index.html.twig', [
             'controller_name' => 'ProductController',
             'products' => $products,
             'filters' => $filters,
+            'currentView' => $currentView,
+            'productImages' => $productImages,
         ]);
     }
 
