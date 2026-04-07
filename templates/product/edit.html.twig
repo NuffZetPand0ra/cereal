@@ -87,6 +87,7 @@
 
 <form method="post" action="{{ path('product_save') }}" enctype="multipart/form-data" class="surface-card p-3 p-md-4">
     <input type="hidden" name="id" value="{{ isEdit ? product.id : '' }}">
+    <input type="hidden" name="ai_image_url" id="ai-image-url-input" value="">
 
     <div class="editor-shell">
         <section class="editor-section">
@@ -332,6 +333,7 @@
                 aiImagePreview: document.getElementById('ai-image-preview'),
                 aiImageLink: document.getElementById('ai-image-link'),
                 aiImagePrompt: document.getElementById('ai-image-prompt'),
+                aiImageUrlInput: document.getElementById('ai-image-url-input'),
                 calories: document.getElementById('calories-input'),
                 fat: document.getElementById('fat-input'),
                 sodium: document.getElementById('sodium-input'),
@@ -491,6 +493,9 @@
                         refs.aiImagePreview.src = String(data.image.url);
                         refs.aiImageLink.href = String(data.image.url);
                         refs.aiImagePrompt.textContent = data.image.prompt ? ('Prompt: ' + String(data.image.prompt)) : '';
+                        if (refs.aiImageUrlInput) {
+                            refs.aiImageUrlInput.value = String(data.image.url);
+                        }
                     }
                 } catch (_error) {
                     refs.aiStatus.textContent = 'AI draft request failed. Please try again.';

@@ -188,6 +188,7 @@ class ProductController extends AbstractController
         $mfr = $em->getRepository(Manufacturer::class)->find($r->get('mfr'));
         $type = $em->getRepository(ProductType::class)->find($r->get('type'));
         $uploadedImage = $r->files->get('image');
+        $aiImageUrl = trim((string) $r->get('ai_image_url'));
         $errors = [];
 
         if (!$mfr) {
@@ -272,6 +273,8 @@ class ProductController extends AbstractController
                 $image->setHeight($imageInfo[1]);
                 $image->setImageData(file_get_contents($uploadedImage->getPathname()));
                 $em->persist($image);
+            } elseif ($aiImageUrl !== '') {
+                $this->persistAiImageFromUrl($product, $aiImageUrl, $em);
             }
 
             $em->flush();
@@ -281,6 +284,54 @@ class ProductController extends AbstractController
             $this->addFlash('error', 'Error saving product: '.$e->getMessage());
             return $this->redirectToProductForm($product);
         }
+    }
+
+    private function persistAiImageFromUrl(Product $product, string $aiImageUrl, EntityManagerInterface $em): void
+    {
+        if (!filter_var($aiImageUrl, FILTER_VALIDATE_URL)) {
+            throw new \RuntimeException('AI image URL is invalid.');
+        }
+
+        $scheme = strtolower((string) parse_url($aiImageUrl, PHP_URL_SCHEME));
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            throw new \RuntimeException('AI image URL must use HTTP or HTTPS.');
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 10,
+                'follow_location' => 1,
+                'user_agent' => 'cereal-ai-assistant/1.0',
+            ],
+        ]);
+
+        $imageBinary = @file_get_contents($aiImageUrl, false, $context);
+        if ($imageBinary === false || $imageBinary === '') {
+            throw new \RuntimeException('Unable to download AI image.');
+        }
+
+        $imageInfo = getimagesizefromstring($imageBinary);
+        if ($imageInfo === false) {
+            throw new \RuntimeException('Downloaded AI image is not a valid image.');
+        }
+
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        $mimeType = (string) ($imageInfo['mime'] ?? '');
+        if (!in_array($mimeType, $allowedMimeTypes, true)) {
+            throw new \RuntimeException('AI image type is not supported.');
+        }
+
+        $image = $em->getRepository(ProductImage::class)->findOneBy(['product' => $product]);
+        if (!$image) {
+            $image = new ProductImage();
+            $image->setProduct($product);
+        }
+
+        $image->setMimeType($mimeType);
+        $image->setWidth((int) $imageInfo[0]);
+        $image->setHeight((int) $imageInfo[1]);
+        $image->setImageData($imageBinary);
+        $em->persist($image);
     }
 
     /**
