@@ -9,6 +9,7 @@ use App\Entity\ProductType;
 use App\Service\ProductFilterService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,7 +33,10 @@ class ProductController extends AbstractController
             throw $this->createNotFoundException('Product with id '.$id.' not found');
         }
         $image = $em->getRepository(ProductImage::class)->findOneBy(['product' => $product]);
-        $image_base64 = base64_encode(stream_get_contents($image->getImageData()));
+        $image_base64 = null;
+        if ($image) {
+            $image_base64 = base64_encode(stream_get_contents($image->getImageData()));
+        }
         // var_dump(base64_encode(stream_get_contents($image->getImageData())));exit;
         return $this->render('product/single.html.twig', [
             'controller_name' => 'ProductController',
@@ -77,6 +81,12 @@ class ProductController extends AbstractController
         } else {
             $product = new Product();
         }
+
+        if(!$product) {
+            $this->addFlash('error', 'Product not found');
+            return $this->redirectToRoute('product_index');
+        }
+
         $product
             ->setName($r->get('name'))
             ->setMfr($em->getRepository(Manufacturer::class)->find($r->get('mfr')))
@@ -93,17 +103,39 @@ class ProductController extends AbstractController
             ->setShelf($r->get('shelf'))
             ->setWeight($r->get('weight'))
             ->setCups($r->get('cups'));
+
+        $uploadedImage = $r->files->get('image');
         try{
             $em->persist($product);
+
+            if ($uploadedImage instanceof UploadedFile && $uploadedImage->isValid()) {
+                $imageInfo = getimagesize($uploadedImage->getPathname());
+                if ($imageInfo === false) {
+                    throw new \RuntimeException('Uploaded file is not a valid image');
+                }
+
+                $image = $em->getRepository(ProductImage::class)->findOneBy(['product' => $product]);
+                if (!$image) {
+                    $image = new ProductImage();
+                    $image->setProduct($product);
+                }
+
+                $image->setMimeType($imageInfo['mime'] ?? $uploadedImage->getMimeType() ?? 'application/octet-stream');
+                $image->setWidth($imageInfo[0]);
+                $image->setHeight($imageInfo[1]);
+                $image->setImageData(file_get_contents($uploadedImage->getPathname()));
+                $em->persist($image);
+            }
+
             $em->flush();
             $this->addFlash('success', 'Product saved');
             return $this->redirectToRoute('single_product_show', ['id' => $product->getId()]);
         } catch (\Exception $e) {
             $this->addFlash('error', 'Error saving product: '.$e->getMessage());
             if($product->getId()) {
-                return $this->redirectToRoute('product_edit', ['id' => $product->getId()]);
+                return $this->redirectToRoute('single_product_edit', ['id' => $product->getId()]);
             } else {
-                return $this->redirectToRoute('product_index');
+                return $this->redirectToRoute('single_product_create');
             }
         }
     }

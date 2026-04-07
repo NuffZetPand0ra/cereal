@@ -1,28 +1,34 @@
 {% extends 'base.html.twig' %}
 
+{% set isEdit = product is defined and product.id is defined and product.id %}
+
 {% block breadcrumb %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{{ path('product_index') }}">Index of cerials</a>
+                <a href="{{ path('product_index') }}">Index of cereals</a>
             </li>
-            <li class="breadcrumb-item">
-                <a href="{{ path('single_product_show', {'id': product.id}) }}">{{ product.name }}</a>
-            </li>
-            <li class="breadcrumb-item active">Edit</li>
+            {% if isEdit %}
+                <li class="breadcrumb-item">
+                    <a href="{{ path('single_product_show', {'id': product.id}) }}">{{ product.name }}</a>
+                </li>
+                <li class="breadcrumb-item active">Edit</li>
+            {% else %}
+                <li class="breadcrumb-item active">Create</li>
+            {% endif %}
         </ol>
     </nav>
 {% endblock %}
 
-{% block title %}Editing {{ product.id }}: {{ product.name }}{% endblock %}
+{% block title %}{% if isEdit %}Editing {{ product.id }}: {{ product.name }}{% else %}Create Cereal{% endif %}{% endblock %}
 
 {% block body %}
-<form method="post" action="{{ path('product_save') }}">
-    <input type="hidden" name="id" value="{{ product.id }}">
+<form method="post" action="{{ path('product_save') }}" enctype="multipart/form-data">
+    <input type="hidden" name="id" value="{{ isEdit ? product.id : '' }}">
     <div class="row">
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="name" type="text" class="form-control" id="name-input" value="{{ product.name }}" placeholder="Name">
+                <input name="name" type="text" class="form-control" id="name-input" value="{{ isEdit ? product.name : '' }}" placeholder="Name">
                 <label for="name-input" class="form-label">Name</label>
             </div>
         </div>
@@ -30,7 +36,7 @@
             <div class="mb-3 form-floating">
                 <select name="mfr" class="form-select" id="mfr-input" placeholder="Manufacturer">
                     {% for mfr in mfrs %}
-                        <option value="{{ mfr.id }}" {% if mfr.id == product.mfr.id %}selected{% endif %}>{{ mfr.name }} ({{ mfr.shorthand }})</option>
+                        <option value="{{ mfr.id }}" {% if isEdit and product.mfr and mfr.id == product.mfr.id %}selected{% endif %}>{{ mfr.name }} ({{ mfr.shorthand }})</option>
                     {% endfor %}
                 </select>
                 <label for="mfr-input" class="form-label">Manufacturer</label>
@@ -40,7 +46,7 @@
             <div class="mb-3 form-floating">
                 <select name="type" class="form-select" id="type-input" placeholder="Type">
                     {% for type in types %}
-                        <option value="{{ type.id }}" {% if type.id == product.type.id %}selected{% endif %}>{{ type.name }}</option>
+                        <option value="{{ type.id }}" {% if isEdit and product.type and type.id == product.type.id %}selected{% endif %}>{{ type.name }}</option>
                     {% endfor %}
                 </select>
                 <label for="type-input" class="form-label">Type</label>
@@ -50,19 +56,19 @@
     <div class="row">
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="calories" type="number" class="form-control" id="calories-input" value="{{ product.calories }}" placeholder="Calories">
+                <input name="calories" type="number" class="form-control" id="calories-input" value="{{ isEdit ? product.calories : '' }}" placeholder="Calories">
                 <label for="calories-input" class="form-label">Calories</label>
             </div>
         </div>
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="protein" type="number" class="form-control" id="protein-input" value="{{ product.protein }}" placeholder="Protein">
+                <input name="protein" type="number" class="form-control" id="protein-input" value="{{ isEdit ? product.protein : '' }}" placeholder="Protein">
                 <label for="protein-input" class="form-label">Protein</label>
             </div>
         </div>
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="fat" type="number" class="form-control" id="fat-input" value="{{ product.fat }}" placeholder="Fat">
+                <input name="fat" type="number" class="form-control" id="fat-input" value="{{ isEdit ? product.fat : '' }}" placeholder="Fat">
                 <label for="fat-input" class="form-label">Fat</label>
             </div>
         </div>
@@ -70,19 +76,19 @@
     <div class="row">
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="sodium" type="number" class="form-control" id="sodium-input" value="{{ product.sodium }}" placeholder="Sodium">
+                <input name="sodium" type="number" class="form-control" id="sodium-input" value="{{ isEdit ? product.sodium : '' }}" placeholder="Sodium">
                 <label for="sodium-input" class="form-label">Sodium</label>
             </div>
         </div>
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="fiber" type="number" class="form-control" id="fiber-input" value="{{ product.fiber }}" placeholder="Fiber">
+                <input name="fiber" type="number" class="form-control" id="fiber-input" value="{{ isEdit ? product.fiber : '' }}" placeholder="Fiber">
                 <label for="fiber-input" class="form-label">Fiber</label>
             </div>
         </div>
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="carbo" type="number" class="form-control" id="carbo-input" value="{{ product.carbo }}" placeholder="Carbs">
+                <input name="carbo" type="number" class="form-control" id="carbo-input" value="{{ isEdit ? product.carbo : '' }}" placeholder="Carbs">
                 <label for="carbo-input" class="form-label">Carbs</label>
             </div>
         </div>
@@ -90,19 +96,19 @@
     <div class="row">
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="sugars" type="number" class="form-control" id="sugars-input" value="{{ product.sugars }}" placeholder="Sugars">
+                <input name="sugars" type="number" class="form-control" id="sugars-input" value="{{ isEdit ? product.sugars : '' }}" placeholder="Sugars">
                 <label for="sugars-input" class="form-label">Sugars</label>
             </div>
         </div>
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="potass" type="number" class="form-control" id="potass-input" value="{{ product.potass }}" placeholder="Potassium">
+                <input name="potass" type="number" class="form-control" id="potass-input" value="{{ isEdit ? product.potass : '' }}" placeholder="Potassium">
                 <label for="potass-input" class="form-label">Potassium</label>
             </div>
         </div>
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="vitamins" type="number" class="form-control" id="vitamins-input" value="{{ product.vitamins }}" placeholder="Vitamins">
+                <input name="vitamins" type="number" class="form-control" id="vitamins-input" value="{{ isEdit ? product.vitamins : '' }}" placeholder="Vitamins">
                 <label for="vitamins-input" class="form-label">Vitamins</label>
             </div>
         </div>
@@ -110,27 +116,38 @@
     <div class="row">
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="shelf" type="number" class="form-control" id="shelf-input" value="{{ product.shelf }}" placeholder="Shelf">
+                <input name="shelf" type="number" class="form-control" id="shelf-input" value="{{ isEdit ? product.shelf : '' }}" placeholder="Shelf">
                 <label for="shelf-input" class="form-label">Shelf</label>
             </div>
         </div>
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="weight" type="number" class="form-control" id="weight-input" value="{{ product.weight }}" placeholder="Weight">
+                <input name="weight" type="number" class="form-control" id="weight-input" value="{{ isEdit ? product.weight : '' }}" placeholder="Weight">
                 <label for="weight-input" class="form-label">Weight</label>
             </div>
         </div>
         <div class="col">
             <div class="mb-3 form-floating">
-                <input name="cups" type="number" class="form-control" id="cups-input" value="{{ product.cups }}" placeholder="Cups">
+                <input name="cups" type="number" class="form-control" id="cups-input" value="{{ isEdit ? product.cups : '' }}" placeholder="Cups">
                 <label for="cups-input" class="form-label">Cups</label>
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="image-input" class="form-label">Product image</label>
+                <input name="image" type="file" class="form-control" id="image-input" accept="image/*">
+                <div class="form-text">{{ isEdit ? 'Upload a new file to replace the current image.' : 'Optional. Upload an image for this cereal.' }}</div>
+            </div>
+        </div>
+    </div>
     <div class="btn-group">
-        <button type="submit" class="btn btn-success">Save edits</button>
-        <a href="{{ path('single_product_show', {id: product.id}) }}" class="btn btn-secondary">See product</a>
-        <a href="{{ path('single_product_delete', {id: product.id}) }}" class="btn btn-danger">Delete</a>
+        <button type="submit" class="btn btn-success">{{ isEdit ? 'Save edits' : 'Create cereal' }}</button>
+        {% if isEdit %}
+            <a href="{{ path('single_product_show', {id: product.id}) }}" class="btn btn-secondary">See product</a>
+            <a href="{{ path('single_product_delete', {id: product.id}) }}" class="btn btn-danger">Delete</a>
+        {% endif %}
     </div>
 </form>
 {% endblock %}
