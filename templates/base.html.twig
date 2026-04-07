@@ -4,19 +4,321 @@
         <meta charset="UTF-8">
         <title>{% block title %}Cereal app{% endblock %}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script>
+            (function () {
+                const savedTheme = localStorage.getItem('theme');
+                const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const theme = savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : preferredTheme;
+                document.documentElement.setAttribute('data-bs-theme', theme);
+            })();
+        </script>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
         {% block styles %}
         {% endblock %}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <style>
+            :root {
+                --cereal-bg: #121923;
+                --cereal-surface: #1a2430;
+                --cereal-surface-soft: #202d3a;
+                --cereal-border: #324355;
+                --cereal-text: #dde4ec;
+                --cereal-muted: #9aabba;
+                --cereal-accent: #db9f2f;
+                --cereal-accent-soft: #3a2e14;
+                --cereal-danger: #d94f57;
+            }
+
+            body {
+                font-family: 'Archivo', sans-serif;
+                color: var(--cereal-text);
+                background:
+                    radial-gradient(circle at 20% -10%, #29384a 0, transparent 35%),
+                    radial-gradient(circle at 80% -20%, #3b311f 0, transparent 32%),
+                    linear-gradient(160deg, #0f151d 0%, var(--cereal-bg) 55%, #121a24 100%);
+            }
+
+            h1, h2, h3, h4, h5, h6 {
+                font-family: 'Space Grotesk', sans-serif;
+                letter-spacing: 0.01em;
+            }
+
+            .app-shell {
+                max-width: 1060px;
+            }
+
+            .surface-card {
+                background: linear-gradient(180deg, #1e2936 0%, #1a2430 100%);
+                border: 1px solid var(--cereal-border);
+                border-radius: 16px;
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+            }
+
+            .hero-band {
+                padding: 1.15rem 1.25rem;
+                border-radius: 16px;
+                border: 1px solid var(--cereal-border);
+                background: linear-gradient(140deg, #1f2c3a 0%, #1a2532 60%, #1e1e1a 100%);
+            }
+
+            .stat-chip {
+                display: inline-block;
+                padding: 0.3rem 0.6rem;
+                border-radius: 999px;
+                background: var(--cereal-accent-soft);
+                color: #ffd99a;
+                border: 1px solid #6f5526;
+                font-size: 0.82rem;
+                font-weight: 700;
+            }
+
+            .cereal-link {
+                color: var(--cereal-text);
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .cereal-link:hover {
+                color: #ffe5b8;
+                text-decoration: underline;
+            }
+
+            .meta-pill {
+                display: inline-block;
+                padding: 0.22rem 0.45rem;
+                border-radius: 999px;
+                border: 1px solid #425669;
+                color: var(--cereal-muted);
+                font-size: 0.78rem;
+            }
+
+            .product-row {
+                background: linear-gradient(180deg, #1a2531 0%, #192431 100%);
+                border: 1px solid var(--cereal-border);
+                border-radius: 12px;
+                transition: transform .16s ease, border-color .16s ease;
+            }
+
+            .product-row:hover {
+                transform: translateY(-2px);
+                border-color: #54708a;
+            }
+
+            .btn-outline-soft {
+                border-color: #556d84;
+                color: #bed1e4;
+            }
+
+            .btn-outline-soft:hover {
+                background: #27384a;
+                color: #e8f3ff;
+                border-color: #7896b2;
+            }
+
+            .btn-danger-soft {
+                background: #3d2024;
+                color: #ffcdd2;
+                border: 1px solid #804046;
+            }
+
+            .btn-danger-soft:hover {
+                background: #4d252a;
+                color: #ffdce0;
+            }
+
+            .nutrition-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.75rem;
+            }
+
+            .nutrition-box {
+                background: var(--cereal-surface-soft);
+                border: 1px solid var(--cereal-border);
+                border-radius: 12px;
+                padding: 0.75rem;
+            }
+
+            .nutrition-box .label {
+                color: var(--cereal-muted);
+                font-size: 0.8rem;
+            }
+
+            .nutrition-box .value {
+                font-size: 1.1rem;
+                font-weight: 700;
+                font-family: 'Space Grotesk', sans-serif;
+            }
+
+            .table {
+                --bs-table-bg: transparent;
+            }
+
+            .theme-toggle {
+                border: 1px solid var(--cereal-border);
+                color: var(--cereal-muted);
+                background: transparent;
+                min-width: 4.5rem;
+            }
+
+            .theme-toggle:hover {
+                border-color: #8ca6be;
+                color: var(--cereal-text);
+                background: rgba(140, 166, 190, 0.1);
+            }
+
+            .nutrition-label {
+                background: #f7f7f2;
+                color: #131313;
+                border: 2px solid #111;
+                border-radius: 8px;
+                padding: 0.9rem;
+                box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+            }
+
+            .nutrition-label .nf-title {
+                font-family: 'Space Grotesk', sans-serif;
+                font-size: 1.6rem;
+                line-height: 1;
+                margin-bottom: 0.2rem;
+            }
+
+            .nutrition-label .nf-subtitle {
+                font-size: 0.8rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .nutrition-label .nf-divider-thick {
+                border-top: 7px solid #111;
+                margin: 0.35rem 0;
+            }
+
+            .nutrition-label .nf-divider {
+                border-top: 1px solid #111;
+                margin: 0;
+            }
+
+            .nutrition-label .nf-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                font-size: 0.92rem;
+                padding: 0.25rem 0;
+                border-top: 1px solid #111;
+            }
+
+            .nutrition-label .nf-row strong {
+                font-weight: 700;
+            }
+
+            .nutrition-label .nf-row .nf-value {
+                text-align: right;
+                margin-left: 1rem;
+            }
+
+            .nutrition-label .nf-row .nf-right {
+                display: inline-flex;
+                align-items: baseline;
+                gap: 0.85rem;
+                margin-left: 1rem;
+                min-width: 8.5rem;
+                justify-content: flex-end;
+            }
+
+            .nutrition-label .nf-dv-head {
+                display: flex;
+                justify-content: flex-end;
+                font-size: 0.75rem;
+                font-weight: 700;
+                margin: 0.1rem 0 0.2rem;
+            }
+
+            .nutrition-label .nf-dv {
+                min-width: 2.8rem;
+                text-align: right;
+                font-weight: 700;
+            }
+
+            .nutrition-label .nf-facts-footnote {
+                font-size: 0.72rem;
+                color: #333;
+                margin-top: 0.45rem;
+            }
+
+            html[data-bs-theme="light"] {
+                --cereal-bg: #e8eff6;
+                --cereal-surface: #ffffff;
+                --cereal-surface-soft: #f4f7fa;
+                --cereal-border: #c6d5e5;
+                --cereal-text: #1f2d3d;
+                --cereal-muted: #526478;
+                --cereal-accent-soft: #f8e8c8;
+            }
+
+            html[data-bs-theme="light"] body {
+                background:
+                    radial-gradient(circle at 10% -10%, #dbe8f5 0, transparent 45%),
+                    radial-gradient(circle at 90% -25%, #f1e8d7 0, transparent 40%),
+                    linear-gradient(165deg, #f6f9fc 0%, #edf3f9 60%, #e7edf5 100%);
+            }
+
+            html[data-bs-theme="light"] .surface-card,
+            html[data-bs-theme="light"] .hero-band,
+            html[data-bs-theme="light"] .product-row,
+            html[data-bs-theme="light"] .editor-section,
+            html[data-bs-theme="light"] .nutrition-box,
+            html[data-bs-theme="light"] .grid-card {
+                background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+                border-color: var(--cereal-border);
+                box-shadow: 0 8px 24px rgba(24, 60, 92, 0.08);
+            }
+
+            html[data-bs-theme="light"] .btn-outline-soft {
+                border-color: #b3c5d8;
+                color: #30485f;
+            }
+
+            html[data-bs-theme="light"] .btn-outline-soft:hover {
+                background: #e6eef7;
+                color: #1f3347;
+                border-color: #9bb2ca;
+            }
+
+            html[data-bs-theme="light"] .meta-pill {
+                border-color: #b9cadb;
+                color: #475f76;
+            }
+
+            html[data-bs-theme="light"] .stat-chip {
+                background: #f7dfb0;
+                color: #5f3f00;
+                border-color: #bd8a2f;
+                box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset;
+            }
+
+            @media (max-width: 768px) {
+                .nutrition-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
 
     </head>
     <body>
-        <div class="col-lg-8 mx-auto p-4 py-md-5">
+        <div class="app-shell mx-auto p-3 p-md-4 py-md-5">
         
-            <header class="d-flex align-items-center pb-3 mb-5 border-bottom">
-                {% block header %}
-                    <h1>{{ block('title') }}</h1>
-                {% endblock %}
+            <header class="d-flex align-items-center justify-content-between gap-3 pb-3 mb-4 border-bottom border-secondary-subtle">
+                <div>
+                    {% block header %}
+                        <h1>{{ block('title') }}</h1>
+                    {% endblock %}
+                </div>
+                <button type="button" class="btn btn-sm theme-toggle" id="theme-toggle" aria-label="Toggle color theme">
+                    <span id="theme-toggle-label"></span>
+                </button>
             </header>
 
             {% block breadcrumb %}{% endblock %}
@@ -25,7 +327,7 @@
                 {% block body %}{% endblock %}
             </main>
 
-            <footer class="pt-5 my-5 text-body-secondary border-top">
+            <footer class="pt-4 my-5 text-body-secondary border-top border-secondary-subtle">
                 {% block footer %}
                     <p>Data appearing in this app have not been verified.</p>
                 {% endblock %}
@@ -59,6 +361,36 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script>
+            (function () {
+                const toggle = document.getElementById('theme-toggle');
+                const label = document.getElementById('theme-toggle-label');
+                if (!toggle || !label) {
+                    return;
+                }
+
+                function getTheme() {
+                    return document.documentElement.getAttribute('data-bs-theme') === 'light' ? 'light' : 'dark';
+                }
+
+                function renderThemeButton() {
+                    const currentTheme = getTheme();
+                    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    label.textContent = nextTheme === 'light' ? 'Light' : 'Dark';
+                    toggle.title = 'Switch to ' + nextTheme + ' mode';
+                    toggle.setAttribute('aria-label', 'Switch to ' + nextTheme + ' mode');
+                }
+
+                toggle.addEventListener('click', function () {
+                    const nextTheme = getTheme() === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-bs-theme', nextTheme);
+                    localStorage.setItem('theme', nextTheme);
+                    renderThemeButton();
+                });
+
+                renderThemeButton();
+            })();
+        </script>
         {% block js %}
         {% endblock %}
     </body>

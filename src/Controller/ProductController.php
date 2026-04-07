@@ -19,13 +19,74 @@ class ProductController extends AbstractController
 {
     public function index(Request $r, EntityManagerInterface $em, ProductFilterService $productFilterService): Response
     {
-        $filters = $productFilterService->parseFilters($r);
+        $filters = $productFilterService->parseFiltersFromArray($this->buildIndexFilterQuery($r));
         $products = $em->getRepository(Product::class)->findWithFilters($filters);
+        $currentView = strtolower((string) $r->query->get('view', 'list'));
+        if (!in_array($currentView, ['list', 'grid'], true)) {
+            $currentView = 'list';
+        }
+
+        $productImages = [];
+        foreach ($products as $product) {
+            $image = $em->getRepository(ProductImage::class)->findOneBy(['product' => $product]);
+            if (!$image) {
+                continue;
+            }
+
+            $imageData = $image->getImageData();
+            $imageBinary = is_resource($imageData) ? stream_get_contents($imageData) : $imageData;
+            if (!$imageBinary) {
+                continue;
+            }
+
+            $productImages[$product->getId()] = [
+                'mimeType' => $image->getMimeType(),
+                'base64' => base64_encode($imageBinary),
+            ];
+        }
+
         return $this->render('product/index.html.twig', [
             'controller_name' => 'ProductController',
             'products' => $products,
             'filters' => $filters,
+            'currentView' => $currentView,
+            'productImages' => $productImages,
         ]);
+    }
+
+    private function buildIndexFilterQuery(Request $request): array
+    {
+        $query = $request->query;
+        $normalizedFilters = [];
+
+        $nameContains = trim((string) $query->get('name_contains', ''));
+        if ($nameContains !== '') {
+            $normalizedFilters['name'] = '%'.$nameContains.'%';
+        }
+
+        $rangeFields = ['calories', 'protein', 'sugars', 'fiber'];
+        foreach ($rangeFields as $field) {
+            $min = trim((string) $query->get($field.'_min', ''));
+            $max = trim((string) $query->get($field.'_max', ''));
+
+            if ($min !== '' && $max !== '') {
+                $normalizedFilters[$field] = $min.'..'.$max;
+            } elseif ($min !== '') {
+                $normalizedFilters[$field] = '>='.$min;
+            } elseif ($max !== '') {
+                $normalizedFilters[$field] = '<='.$max;
+            }
+        }
+
+        $sortBy = trim((string) $query->get('sort_by', 'name'));
+        $sortDirection = strtolower(trim((string) $query->get('sort_dir', 'asc')));
+        $allowedSortFields = ['name', 'calories', 'protein', 'sugars', 'fiber'];
+        if (!in_array($sortBy, $allowedSortFields, true)) {
+            $sortBy = 'name';
+        }
+        $normalizedFilters['order'] = ($sortDirection === 'desc' ? '>' : '<').$sortBy;
+
+        return $normalizedFilters;
     }
     
     public function show(int $id, EntityManagerInterface $em): Response

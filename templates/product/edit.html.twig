@@ -22,132 +22,371 @@
 
 {% block title %}{% if isEdit %}Editing {{ product.id }}: {{ product.name }}{% else %}Create Cereal{% endif %}{% endblock %}
 
+{% block styles %}
+    {{ parent() }}
+    <style>
+        .editor-shell {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .editor-section {
+            border: 1px solid var(--cereal-border);
+            border-radius: 14px;
+            padding: 1rem;
+            background: linear-gradient(180deg, #1b2733 0%, #1a2531 100%);
+        }
+
+        .editor-section h3 {
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            color: #e7edf4;
+        }
+
+        .editor-meta {
+            color: var(--cereal-muted);
+            font-size: 0.88rem;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            border-top: 1px solid var(--cereal-border);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<form method="post" action="{{ path('product_save') }}" enctype="multipart/form-data">
+<section class="hero-band mb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-2 align-items-md-center">
+        <div>
+            <h2 class="h4 mb-1">{{ isEdit ? 'Edit cereal' : 'Create cereal' }}</h2>
+            <div class="editor-meta">{{ isEdit ? 'Update nutrition values and media details.' : 'Fill in product identity, nutrition facts, and image.' }}</div>
+        </div>
+        {% if isEdit %}
+            <span class="stat-chip">Product #{{ product.id }}</span>
+        {% endif %}
+    </div>
+</section>
+
+<form method="post" action="{{ path('product_save') }}" enctype="multipart/form-data" class="surface-card p-3 p-md-4">
     <input type="hidden" name="id" value="{{ isEdit ? product.id : '' }}">
-    <div class="row">
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="name" type="text" class="form-control" id="name-input" value="{{ isEdit ? product.name : '' }}" placeholder="Name" required minlength="2" maxlength="255">
-                <label for="name-input" class="form-label">Name</label>
+
+    <div class="editor-shell">
+        <section class="editor-section">
+            <h3>Identity</h3>
+            <div class="row g-3">
+                <div class="col-12 col-md-4">
+                    <label for="name-input" class="form-label">Name</label>
+                    <input name="name" type="text" class="form-control" id="name-input" value="{{ isEdit ? product.name : '' }}" required minlength="2" maxlength="255" placeholder="Cereal name">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label for="mfr-input" class="form-label">Manufacturer</label>
+                    <select name="mfr" class="form-select" id="mfr-input" required>
+                        {% for mfr in mfrs %}
+                            <option value="{{ mfr.id }}" {% if isEdit and product.mfr and mfr.id == product.mfr.id %}selected{% endif %}>{{ mfr.name }} ({{ mfr.shorthand }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label for="type-input" class="form-label">Type</label>
+                    <select name="type" class="form-select" id="type-input" required>
+                        {% for type in types %}
+                            <option value="{{ type.id }}" {% if isEdit and product.type and type.id == product.type.id %}selected{% endif %}>{{ type.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <select name="mfr" class="form-select" id="mfr-input" placeholder="Manufacturer" required>
-                    {% for mfr in mfrs %}
-                        <option value="{{ mfr.id }}" {% if isEdit and product.mfr and mfr.id == product.mfr.id %}selected{% endif %}>{{ mfr.name }} ({{ mfr.shorthand }})</option>
-                    {% endfor %}
-                </select>
-                <label for="mfr-input" class="form-label">Manufacturer</label>
+        </section>
+
+        <section class="editor-section">
+            <h3>Macronutrients</h3>
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <label for="calories-input" class="form-label">Calories</label>
+                    <input name="calories" type="number" class="form-control" id="calories-input" value="{{ isEdit ? product.calories : '' }}" required min="0" step="1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="protein-input" class="form-label">Protein</label>
+                    <input name="protein" type="number" class="form-control" id="protein-input" value="{{ isEdit ? product.protein : '' }}" required min="0" step="1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="fat-input" class="form-label">Fat</label>
+                    <input name="fat" type="number" class="form-control" id="fat-input" value="{{ isEdit ? product.fat : '' }}" required min="0" step="1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="sodium-input" class="form-label">Sodium</label>
+                    <input name="sodium" type="number" class="form-control" id="sodium-input" value="{{ isEdit ? product.sodium : '' }}" required min="0" step="1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="fiber-input" class="form-label">Fiber</label>
+                    <input name="fiber" type="number" class="form-control" id="fiber-input" value="{{ isEdit ? product.fiber : '' }}" required min="0" step="0.1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="carbo-input" class="form-label">Carbs</label>
+                    <input name="carbo" type="number" class="form-control" id="carbo-input" value="{{ isEdit ? product.carbo : '' }}" required min="0" step="0.1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="sugars-input" class="form-label">Sugars</label>
+                    <input name="sugars" type="number" class="form-control" id="sugars-input" value="{{ isEdit ? product.sugars : '' }}" required min="0" step="1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="potass-input" class="form-label">Potassium</label>
+                    <input name="potass" type="number" class="form-control" id="potass-input" value="{{ isEdit ? product.potass : '' }}" min="0" step="1">
+                </div>
             </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <select name="type" class="form-select" id="type-input" placeholder="Type" required>
-                    {% for type in types %}
-                        <option value="{{ type.id }}" {% if isEdit and product.type and type.id == product.type.id %}selected{% endif %}>{{ type.name }}</option>
-                    {% endfor %}
-                </select>
-                <label for="type-input" class="form-label">Type</label>
+        </section>
+
+        <section class="editor-section">
+            <h3>Serving & Packaging</h3>
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <label for="vitamins-input" class="form-label">Vitamins</label>
+                    <input name="vitamins" type="number" class="form-control" id="vitamins-input" value="{{ isEdit ? product.vitamins : '' }}" required min="0" step="1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="shelf-input" class="form-label">Shelf</label>
+                    <input name="shelf" type="number" class="form-control" id="shelf-input" value="{{ isEdit ? product.shelf : '' }}" required min="0" step="1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="weight-input" class="form-label">Weight</label>
+                    <input name="weight" type="number" class="form-control" id="weight-input" value="{{ isEdit ? product.weight : '' }}" required min="0" step="0.1">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="cups-input" class="form-label">Cups</label>
+                    <input name="cups" type="number" class="form-control" id="cups-input" value="{{ isEdit ? product.cups : '' }}" required min="0" step="0.01">
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section class="editor-section">
+            <h3>Live Nutrition Label Preview</h3>
+            <div class="nutrition-label" id="live-nutrition-label">
+                <div class="nf-title">Nutrition Facts</div>
+                <div class="nf-subtitle">Cereal profile for <span id="preview-name">{{ isEdit ? product.name : 'New cereal' }}</span></div>
+                <div class="nf-divider-thick"></div>
+
+                <div class="d-flex justify-content-between small mb-1">
+                    <span><strong>Manufacturer:</strong> <span id="preview-mfr">{{ isEdit and product.mfr ? product.mfr.name ~ ' (' ~ product.mfr.shorthand ~ ')' : '-' }}</span></span>
+                    <span><strong>Type:</strong> <span id="preview-type">{{ isEdit and product.type ? product.type.name : '-' }}</span></span>
+                </div>
+
+                <div class="nf-divider"></div>
+                <div class="nf-row">
+                    <strong>Calories</strong>
+                    <span class="nf-value"><strong id="preview-calories">{{ isEdit ? product.calories : 0 }}</strong></span>
+                </div>
+
+                <div class="nf-divider-thick"></div>
+                <div class="nf-dv-head">% Daily Value*</div>
+
+                <div class="nf-row">
+                    <strong>Total Fat</strong>
+                    <span class="nf-right">
+                        <span class="nf-value"><span id="preview-fat">{{ isEdit ? product.fat : 0 }}</span> g</span>
+                        <span class="nf-dv" id="preview-dv-fat">0%</span>
+                    </span>
+                </div>
+                <div class="nf-row">
+                    <strong>Sodium</strong>
+                    <span class="nf-right">
+                        <span class="nf-value"><span id="preview-sodium">{{ isEdit ? product.sodium : 0 }}</span> mg</span>
+                        <span class="nf-dv" id="preview-dv-sodium">0%</span>
+                    </span>
+                </div>
+                <div class="nf-row">
+                    <strong>Total Carbohydrate</strong>
+                    <span class="nf-right">
+                        <span class="nf-value"><span id="preview-carbo">{{ isEdit ? product.carbo : 0 }}</span> g</span>
+                        <span class="nf-dv" id="preview-dv-carbo">0%</span>
+                    </span>
+                </div>
+                <div class="nf-row">
+                    <strong>Dietary Fiber</strong>
+                    <span class="nf-right">
+                        <span class="nf-value"><span id="preview-fiber">{{ isEdit ? product.fiber : 0 }}</span> g</span>
+                        <span class="nf-dv" id="preview-dv-fiber">0%</span>
+                    </span>
+                </div>
+                <div class="nf-row">
+                    <strong>Total Sugars</strong>
+                    <span class="nf-right">
+                        <span class="nf-value"><span id="preview-sugars">{{ isEdit ? product.sugars : 0 }}</span> g</span>
+                        <span class="nf-dv">--</span>
+                    </span>
+                </div>
+                <div class="nf-row">
+                    <strong>Protein</strong>
+                    <span class="nf-right">
+                        <span class="nf-value"><span id="preview-protein">{{ isEdit ? product.protein : 0 }}</span> g</span>
+                        <span class="nf-dv" id="preview-dv-protein">0%</span>
+                    </span>
+                </div>
+
+                <div class="nf-divider-thick"></div>
+
+                <div class="nf-row">
+                    <strong>Potassium</strong>
+                    <span class="nf-right">
+                        <span class="nf-value"><span id="preview-potass">{{ isEdit ? (product.potass ?? 0) : 0 }}</span> mg</span>
+                        <span class="nf-dv" id="preview-dv-potass">0%</span>
+                    </span>
+                </div>
+                <div class="nf-row">
+                    <strong>Vitamins</strong>
+                    <span class="nf-right">
+                        <span class="nf-value"><span id="preview-vitamins">{{ isEdit ? product.vitamins : 0 }}</span>%</span>
+                        <span class="nf-dv"><span id="preview-vitamins-dv">{{ isEdit ? product.vitamins : 0 }}</span>%</span>
+                    </span>
+                </div>
+
+                <div class="nf-divider"></div>
+                <div class="nf-facts-footnote">
+                    Shelf <span id="preview-shelf">{{ isEdit ? product.shelf : 0 }}</span> | Weight <span id="preview-weight">{{ isEdit ? product.weight : 0 }}</span> oz | Cups <span id="preview-cups">{{ isEdit ? product.cups : 0 }}</span>
+                </div>
+                <div class="nf-facts-footnote">
+                    *% Daily Value shown with US FDA reference values (2,000 calorie diet).
+                </div>
+            </div>
+        </section>
+
+        <section class="editor-section">
+            <h3>Media</h3>
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-8">
+                    <label for="image-input" class="form-label">Product image</label>
+                    <input name="image" type="file" class="form-control" id="image-input" accept="image/*">
+                    <div class="form-text">{{ isEdit ? 'Upload a new file to replace the current image.' : 'Optional. Upload an image for this cereal.' }}</div>
+                </div>
+            </div>
+        </section>
     </div>
-    <div class="row">
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="calories" type="number" class="form-control" id="calories-input" value="{{ isEdit ? product.calories : '' }}" placeholder="Calories" required min="0" step="1">
-                <label for="calories-input" class="form-label">Calories</label>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="protein" type="number" class="form-control" id="protein-input" value="{{ isEdit ? product.protein : '' }}" placeholder="Protein" required min="0" step="1">
-                <label for="protein-input" class="form-label">Protein</label>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="fat" type="number" class="form-control" id="fat-input" value="{{ isEdit ? product.fat : '' }}" placeholder="Fat" required min="0" step="1">
-                <label for="fat-input" class="form-label">Fat</label>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="sodium" type="number" class="form-control" id="sodium-input" value="{{ isEdit ? product.sodium : '' }}" placeholder="Sodium" required min="0" step="1">
-                <label for="sodium-input" class="form-label">Sodium</label>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="fiber" type="number" class="form-control" id="fiber-input" value="{{ isEdit ? product.fiber : '' }}" placeholder="Fiber" required min="0" step="0.1">
-                <label for="fiber-input" class="form-label">Fiber</label>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="carbo" type="number" class="form-control" id="carbo-input" value="{{ isEdit ? product.carbo : '' }}" placeholder="Carbs" required min="0" step="0.1">
-                <label for="carbo-input" class="form-label">Carbs</label>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="sugars" type="number" class="form-control" id="sugars-input" value="{{ isEdit ? product.sugars : '' }}" placeholder="Sugars" required min="0" step="1">
-                <label for="sugars-input" class="form-label">Sugars</label>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="potass" type="number" class="form-control" id="potass-input" value="{{ isEdit ? product.potass : '' }}" placeholder="Potassium" min="0" step="1">
-                <label for="potass-input" class="form-label">Potassium</label>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="vitamins" type="number" class="form-control" id="vitamins-input" value="{{ isEdit ? product.vitamins : '' }}" placeholder="Vitamins" required min="0" step="1">
-                <label for="vitamins-input" class="form-label">Vitamins</label>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="shelf" type="number" class="form-control" id="shelf-input" value="{{ isEdit ? product.shelf : '' }}" placeholder="Shelf" required min="0" step="1">
-                <label for="shelf-input" class="form-label">Shelf</label>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="weight" type="number" class="form-control" id="weight-input" value="{{ isEdit ? product.weight : '' }}" placeholder="Weight" required min="0" step="0.1">
-                <label for="weight-input" class="form-label">Weight</label>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3 form-floating">
-                <input name="cups" type="number" class="form-control" id="cups-input" value="{{ isEdit ? product.cups : '' }}" placeholder="Cups" required min="0" step="0.1">
-                <label for="cups-input" class="form-label">Cups</label>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label for="image-input" class="form-label">Product image</label>
-                <input name="image" type="file" class="form-control" id="image-input" accept="image/*">
-                <div class="form-text">{{ isEdit ? 'Upload a new file to replace the current image.' : 'Optional. Upload an image for this cereal.' }}</div>
-            </div>
-        </div>
-    </div>
-    <div class="btn-group">
-        <button type="submit" class="btn btn-success">{{ isEdit ? 'Save edits' : 'Create cereal' }}</button>
+
+    <div class="editor-actions">
+        <button type="submit" class="btn btn-success">{{ isEdit ? 'Save changes' : 'Create cereal' }}</button>
         {% if isEdit %}
             <a href="{{ path('single_product_show', {id: product.id}) }}" class="btn btn-secondary">See product</a>
-            <a href="{{ path('single_product_delete', {id: product.id}) }}" class="btn btn-danger">Delete</a>
+            <a href="{{ path('single_product_delete', {id: product.id}) }}" class="btn btn-danger-soft" onclick="return confirm('Delete {{ product.name|e('js') }}? This action cannot be undone.');">Delete</a>
         {% endif %}
     </div>
 </form>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        (function () {
+            const refs = {
+                name: document.getElementById('name-input'),
+                mfr: document.getElementById('mfr-input'),
+                type: document.getElementById('type-input'),
+                calories: document.getElementById('calories-input'),
+                fat: document.getElementById('fat-input'),
+                sodium: document.getElementById('sodium-input'),
+                carbo: document.getElementById('carbo-input'),
+                fiber: document.getElementById('fiber-input'),
+                sugars: document.getElementById('sugars-input'),
+                protein: document.getElementById('protein-input'),
+                potass: document.getElementById('potass-input'),
+                vitamins: document.getElementById('vitamins-input'),
+                shelf: document.getElementById('shelf-input'),
+                weight: document.getElementById('weight-input'),
+                cups: document.getElementById('cups-input')
+            };
+
+            const out = {
+                name: document.getElementById('preview-name'),
+                mfr: document.getElementById('preview-mfr'),
+                type: document.getElementById('preview-type'),
+                calories: document.getElementById('preview-calories'),
+                fat: document.getElementById('preview-fat'),
+                sodium: document.getElementById('preview-sodium'),
+                carbo: document.getElementById('preview-carbo'),
+                fiber: document.getElementById('preview-fiber'),
+                sugars: document.getElementById('preview-sugars'),
+                protein: document.getElementById('preview-protein'),
+                potass: document.getElementById('preview-potass'),
+                vitamins: document.getElementById('preview-vitamins'),
+                vitaminsDv: document.getElementById('preview-vitamins-dv'),
+                shelf: document.getElementById('preview-shelf'),
+                weight: document.getElementById('preview-weight'),
+                cups: document.getElementById('preview-cups'),
+                dvFat: document.getElementById('preview-dv-fat'),
+                dvSodium: document.getElementById('preview-dv-sodium'),
+                dvCarbo: document.getElementById('preview-dv-carbo'),
+                dvFiber: document.getElementById('preview-dv-fiber'),
+                dvProtein: document.getElementById('preview-dv-protein'),
+                dvPotass: document.getElementById('preview-dv-potass')
+            };
+
+            const usDv = { fat: 78, sodium: 2300, carbo: 275, fiber: 28, protein: 50, potass: 4700 };
+
+            function num(input, fallback) {
+                if (!input || input.value === '') {
+                    return fallback;
+                }
+                const n = parseFloat(String(input.value).replace(',', '.'));
+                return Number.isFinite(n) ? n : fallback;
+            }
+
+            function pct(value, base) {
+                return Math.max(0, Math.round((value / base) * 100)) + '%';
+            }
+
+            function updatePreview() {
+                out.name.textContent = refs.name.value.trim() || 'New cereal';
+
+                const selectedMfr = refs.mfr.options[refs.mfr.selectedIndex];
+                out.mfr.textContent = selectedMfr ? selectedMfr.textContent : '-';
+
+                const selectedType = refs.type.options[refs.type.selectedIndex];
+                out.type.textContent = selectedType ? selectedType.textContent : '-';
+
+                const calories = num(refs.calories, 0);
+                const fat = num(refs.fat, 0);
+                const sodium = num(refs.sodium, 0);
+                const carbo = num(refs.carbo, 0);
+                const fiber = num(refs.fiber, 0);
+                const sugars = num(refs.sugars, 0);
+                const protein = num(refs.protein, 0);
+                const potass = num(refs.potass, 0);
+                const vitamins = num(refs.vitamins, 0);
+
+                out.calories.textContent = String(calories);
+                out.fat.textContent = String(fat);
+                out.sodium.textContent = String(sodium);
+                out.carbo.textContent = String(carbo);
+                out.fiber.textContent = String(fiber);
+                out.sugars.textContent = String(sugars);
+                out.protein.textContent = String(protein);
+                out.potass.textContent = String(potass);
+                out.vitamins.textContent = String(vitamins);
+                out.vitaminsDv.textContent = String(vitamins);
+
+                out.shelf.textContent = String(num(refs.shelf, 0));
+                out.weight.textContent = String(num(refs.weight, 0));
+                out.cups.textContent = String(num(refs.cups, 0));
+
+                out.dvFat.textContent = pct(fat, usDv.fat);
+                out.dvSodium.textContent = pct(sodium, usDv.sodium);
+                out.dvCarbo.textContent = pct(carbo, usDv.carbo);
+                out.dvFiber.textContent = pct(fiber, usDv.fiber);
+                out.dvProtein.textContent = pct(protein, usDv.protein);
+                out.dvPotass.textContent = pct(potass, usDv.potass);
+            }
+
+            Object.values(refs).forEach(function (input) {
+                if (!input) {
+                    return;
+                }
+                input.addEventListener('input', updatePreview);
+                input.addEventListener('change', updatePreview);
+            });
+
+            updatePreview();
+        })();
+    </script>
 {% endblock %}

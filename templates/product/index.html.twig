@@ -2,6 +2,66 @@
 
 {% block title %}All cereals{% endblock %}
 
+{% block styles %}
+    {{ parent() }}
+    <style>
+        .view-toggle {
+            display: inline-flex;
+            border: 1px solid var(--cereal-border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .view-toggle .btn {
+            border: 0;
+            border-radius: 0;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 0.9rem;
+        }
+
+        .grid-card {
+            border: 1px solid var(--cereal-border);
+            border-radius: 14px;
+            background: linear-gradient(180deg, #1a2531 0%, #17222e 100%);
+            overflow: hidden;
+        }
+
+        .grid-card .thumb {
+            height: 140px;
+            background: #1f2c39;
+            border-bottom: 1px solid var(--cereal-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-card .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .grid-card .thumb .placeholder {
+            color: var(--cereal-muted);
+            font-size: 0.84rem;
+        }
+
+        .grid-card .body {
+            padding: 0.75rem;
+        }
+
+        .grid-card .title {
+            color: var(--cereal-text);
+            text-decoration: none;
+            font-weight: 700;
+        }
+    </style>
+{% endblock %}
+
 {% block breadcrumb %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -11,46 +71,175 @@
 {% endblock %}
 
 {% block body %}
-    {% if filters|length > 0 %}
-        <div class="alert alert-info" role="alert">
-            <p>Showing cereals with the following criteria:</p>
-            {% for filter in filters %}
-                {% if filter.key == 'order' %}
-                    <p>Ordered by <strong>{{ filter.value }}</strong> in <strong>{{ filter.operator == ">" ? "descending" : "ascending" }}</strong> order</p>
+    {% set currentSortBy = app.request.query.get('sort_by', 'name') %}
+    {% set currentSortDir = app.request.query.get('sort_dir', 'asc') %}
+    {% set hasActiveFilters = app.request.query.get('name_contains', '') != ''
+        or app.request.query.get('calories_min', '') != ''
+        or app.request.query.get('calories_max', '') != ''
+        or app.request.query.get('protein_min', '') != ''
+        or app.request.query.get('sugars_max', '') != ''
+        or app.request.query.get('fiber_min', '') != '' %}
+
+    <section class="hero-band mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center">
+            <div>
+                <h2 class="h4 mb-1">Cereal Catalog</h2>
+                <p class="text-body-secondary mb-2">Browse, edit and curate your collection.</p>
+                <span class="stat-chip">{{ products|length }} cereals</span>
+            </div>
+            <div>
+                <a class="btn btn-warning fw-semibold" href="{{ path('single_product_create') }}">Create cereal</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="surface-card p-3 p-md-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="h5 mb-0">Filters</h3>
+            <a href="{{ path('product_index') }}" class="btn btn-sm btn-outline-soft">Reset</a>
+        </div>
+        <form method="get" action="{{ path('product_index') }}" class="row g-2 g-md-3">
+            <div class="col-12 col-md-4">
+                <label class="form-label mb-1" for="name-contains">Name contains</label>
+                <input id="name-contains" type="text" name="name_contains" class="form-control" value="{{ app.request.query.get('name_contains', '') }}" placeholder="Cheerios">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label mb-1" for="calories-min">Calories min</label>
+                <input id="calories-min" type="number" min="0" step="1" name="calories_min" class="form-control" value="{{ app.request.query.get('calories_min', '') }}">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label mb-1" for="calories-max">Calories max</label>
+                <input id="calories-max" type="number" min="0" step="1" name="calories_max" class="form-control" value="{{ app.request.query.get('calories_max', '') }}">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label mb-1" for="protein-min">Protein min</label>
+                <input id="protein-min" type="number" min="0" step="1" name="protein_min" class="form-control" value="{{ app.request.query.get('protein_min', '') }}">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label mb-1" for="sugars-max">Sugars max</label>
+                <input id="sugars-max" type="number" min="0" step="1" name="sugars_max" class="form-control" value="{{ app.request.query.get('sugars_max', '') }}">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label mb-1" for="fiber-min">Fiber min</label>
+                <input id="fiber-min" type="number" min="0" step="0.1" name="fiber_min" class="form-control" value="{{ app.request.query.get('fiber_min', '') }}">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label mb-1" for="sort-by">Sort by</label>
+                <select id="sort-by" name="sort_by" class="form-select">
+                    <option value="name" {% if currentSortBy == 'name' %}selected{% endif %}>Name</option>
+                    <option value="calories" {% if currentSortBy == 'calories' %}selected{% endif %}>Calories</option>
+                    <option value="protein" {% if currentSortBy == 'protein' %}selected{% endif %}>Protein</option>
+                    <option value="sugars" {% if currentSortBy == 'sugars' %}selected{% endif %}>Sugars</option>
+                    <option value="fiber" {% if currentSortBy == 'fiber' %}selected{% endif %}>Fiber</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label mb-1" for="sort-dir">Direction</label>
+                <select id="sort-dir" name="sort_dir" class="form-select">
+                    <option value="asc" {% if currentSortDir == 'asc' %}selected{% endif %}>Ascending</option>
+                    <option value="desc" {% if currentSortDir == 'desc' %}selected{% endif %}>Descending</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-grid align-self-end">
+                <button type="submit" class="btn btn-warning fw-semibold">Apply</button>
+            </div>
+        </form>
+    </section>
+
+    {% if hasActiveFilters or currentSortBy != 'name' or currentSortDir != 'asc' %}
+        <div class="surface-card p-3 mb-4" role="status" aria-live="polite">
+            <div class="small text-body-secondary mb-2">Current filters</div>
+            <div class="d-flex flex-wrap gap-2">
+                {% if app.request.query.get('name_contains', '') != '' %}
+                    <span class="meta-pill">Name contains: {{ app.request.query.get('name_contains') }}</span>
                 {% endif %}
-            {% endfor %}
-            <ul>
-                {% for filter in filters %}
-                    {% if filter.key != 'order' %}
-                        <li>{{ filter.key }} {{ filter.operator }} {{ filter.value }}</li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
+                {% if app.request.query.get('calories_min', '') != '' %}
+                    <span class="meta-pill">Calories >= {{ app.request.query.get('calories_min') }}</span>
+                {% endif %}
+                {% if app.request.query.get('calories_max', '') != '' %}
+                    <span class="meta-pill">Calories <= {{ app.request.query.get('calories_max') }}</span>
+                {% endif %}
+                {% if app.request.query.get('protein_min', '') != '' %}
+                    <span class="meta-pill">Protein >= {{ app.request.query.get('protein_min') }}</span>
+                {% endif %}
+                {% if app.request.query.get('sugars_max', '') != '' %}
+                    <span class="meta-pill">Sugars <= {{ app.request.query.get('sugars_max') }}</span>
+                {% endif %}
+                {% if app.request.query.get('fiber_min', '') != '' %}
+                    <span class="meta-pill">Fiber >= {{ app.request.query.get('fiber_min') }}</span>
+                {% endif %}
+                {% if currentSortBy != 'name' or currentSortDir != 'asc' %}
+                    <span class="meta-pill">Sort: {{ currentSortBy|capitalize }} {{ currentSortDir == 'desc' ? 'desc' : 'asc' }}</span>
+                {% endif %}
+            </div>
         </div>
     {% endif %}
+
+    {% set listViewQuery = app.request.query.all|merge({'view': 'list'}) %}
+    {% set gridViewQuery = app.request.query.all|merge({'view': 'grid'}) %}
+    <div class="d-flex justify-content-end mb-3">
+        <div class="view-toggle">
+            <a href="{{ path('product_index', listViewQuery) }}" class="btn btn-sm {{ currentView == 'list' ? 'btn-warning' : 'btn-outline-soft' }}">List</a>
+            <a href="{{ path('product_index', gridViewQuery) }}" class="btn btn-sm {{ currentView == 'grid' ? 'btn-warning' : 'btn-outline-soft' }}">Grid</a>
+        </div>
+    </div>
+
     {% if products|length == 0 %}
         <div class="alert alert-warning" role="alert">
             No cereals found{% if filters|length > 0 %} with the set criteria{% endif %}.
         </div>
     {% else %}
-        <h4>Found {{ products|length }} cereals</h4>
-        <div class="mb-2">
-            <a class="btn btn-primary" href="{{ path('single_product_create') }}">Create new cereal</a>
-        </div>
-        <ul class="list-group list-group-flush">
+        {% if currentView == 'grid' %}
+            <div class="grid-cards">
+                {% for product in products %}
+                    <article class="grid-card">
+                        <div class="thumb">
+                            {% if productImages[product.id] is defined %}
+                                <img src="data:{{ productImages[product.id].mimeType }};base64,{{ productImages[product.id].base64 }}" alt="{{ product.name }}">
+                            {% else %}
+                                <span class="placeholder">No image</span>
+                            {% endif %}
+                        </div>
+                        <div class="body">
+                            <a href="{{ path('single_product_show', {'id': product.id}) }}" class="title">{{ product.name }}</a>
+                            <div class="mt-2 d-flex flex-wrap gap-1">
+                                <span class="meta-pill">{{ product.mfr.name }}</span>
+                                <span class="meta-pill">{{ product.type.name }}</span>
+                                <span class="meta-pill">{{ product.calories }} cal</span>
+                            </div>
+                            <div class="mt-3 d-flex gap-2">
+                                <a href="{{ path('single_product_show', {'id': product.id}) }}" class="btn btn-sm btn-outline-soft">View</a>
+                                <a href="{{ path('single_product_edit', {'id': product.id}) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                <a href="{{ path('single_product_delete', {'id': product.id}) }}" class="btn btn-sm btn-danger-soft" onclick="return confirm('Delete {{ product.name|e('js') }}? This action cannot be undone.');">Delete</a>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+        <div class="surface-card p-3 p-md-4">
+        <ul class="list-unstyled mb-0 d-grid gap-2">
             {% for product in products %}
-            <li class="list-group-item d-flex justify-content-between align-items-center list-group-item-action">
-                {{ product.name }}
-                <div class="btn-group">
-                    <a href="{{ path('single_product_show', {'id': product.id}) }}" class="btn btn-sm btn-primary">Show</a>
-                    <a href="{{ path('single_product_edit', {'id': product.id}) }}" class="btn btn-sm btn-secondary">Edit</a>
-                    <a href="{{ path('single_product_delete', {'id': product.id}) }}" class="btn btn-sm btn-danger">Delete</a>
+            <li class="product-row p-2 p-md-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-2 gap-md-3 align-items-md-center">
+                    <div>
+                        <a href="{{ path('single_product_show', {'id': product.id}) }}" class="cereal-link fs-5">{{ product.name }}</a>
+                        <div class="mt-1 d-flex flex-wrap gap-1">
+                            <span class="meta-pill">{{ product.mfr.name }}</span>
+                            <span class="meta-pill">{{ product.type.name }}</span>
+                            <span class="meta-pill">{{ product.calories }} cal</span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ path('single_product_show', {'id': product.id}) }}" class="btn btn-sm btn-outline-soft">View</a>
+                        <a href="{{ path('single_product_edit', {'id': product.id}) }}" class="btn btn-sm btn-secondary">Edit</a>
+                        <a href="{{ path('single_product_delete', {'id': product.id}) }}" class="btn btn-sm btn-danger-soft" onclick="return confirm('Delete {{ product.name|e('js') }}? This action cannot be undone.');">Delete</a>
+                    </div>
                 </div>
             </li>
             {% endfor %}
         </ul>
+        </div>
+        {% endif %}
     {% endif %}
-    <div class="mt-5">
-        <a class="btn btn-primary" href="{{ path('single_product_create') }}">Create new cereal</a>
-    </div>
 {% endblock %}

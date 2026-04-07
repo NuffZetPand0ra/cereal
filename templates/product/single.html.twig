@@ -14,90 +14,165 @@
 {% endblock %}
 
 {% block body %}
-<div class="">
-    {% if image is not null %}
-        <img 
-            src="data:{{ image.mimeType }};base64,{{ image_base64 }}" 
-            height="{{ image.height }}" 
-            width="{{ image.width }}" 
-            alt="{{ product.name }}" 
-            class="img-fluid"
-        >
-    {% else %}
-        <img 
-            src="https://via.placeholder.com/300" 
-            alt="{{ product.name }}" 
-            class="img-fluid"
-        >
-    {% endif %}
+{% set usDv = {
+    fat: 78,
+    sodium: 2300,
+    carbo: 275,
+    fiber: 28,
+    protein: 50,
+    potassium: 4700
+} %}
+{% set dvFat = ((product.fat / usDv.fat) * 100)|round(0, 'common') %}
+{% set dvSodium = ((product.sodium / usDv.sodium) * 100)|round(0, 'common') %}
+{% set dvCarbo = ((product.carbo / usDv.carbo) * 100)|round(0, 'common') %}
+{% set dvFiber = ((product.fiber / usDv.fiber) * 100)|round(0, 'common') %}
+{% set dvProtein = ((product.protein / usDv.protein) * 100)|round(0, 'common') %}
+{% set dvPotassium = (((product.potass ?? 0) / usDv.potassium) * 100)|round(0, 'common') %}
+
+<div class="row g-3 g-md-4 mb-4 align-items-stretch">
+    <div class="col-md-5">
+        <div class="surface-card p-3 h-100">
+            {% if image is not null %}
+                <img
+                    src="data:{{ image.mimeType }};base64,{{ image_base64 }}"
+                    alt="{{ product.name }}"
+                    class="img-fluid rounded-3 w-100"
+                >
+            {% else %}
+                <div class="d-flex justify-content-center align-items-center rounded-3 h-100 py-5" style="background: #222f3c; border: 1px dashed #4f647a; min-height: 260px;">
+                    <p class="text-body-secondary mb-0">No image uploaded yet</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="surface-card p-3 p-md-4 h-100">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                <div>
+                    <h2 class="h4 mb-1">{{ product.name }}</h2>
+                    <div class="d-flex gap-1 flex-wrap">
+                        <span class="meta-pill">{{ product.mfr.name }} ({{ product.mfr.shorthand }})</span>
+                        <span class="meta-pill">{{ product.type.name }}</span>
+                        <span class="meta-pill">Shelf {{ product.shelf }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nutrition-grid mb-3">
+                <div class="nutrition-box">
+                    <div class="label">Calories</div>
+                    <div class="value">{{ product.calories }}</div>
+                </div>
+                <div class="nutrition-box">
+                    <div class="label">Sugars</div>
+                    <div class="value">{{ product.sugars }} g</div>
+                </div>
+                <div class="nutrition-box">
+                    <div class="label">Protein</div>
+                    <div class="value">{{ product.protein }} g</div>
+                </div>
+                <div class="nutrition-box">
+                    <div class="label">Fiber</div>
+                    <div class="value">{{ product.fiber }} g</div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="{{ path('single_product_edit', {id: product.id}) }}" class="btn btn-secondary">Edit</a>
+                <a href="{{ path('single_product_delete', {id: product.id}) }}" class="btn btn-danger-soft" onclick="return confirm('Delete {{ product.name|e('js') }}? This action cannot be undone.');">Delete</a>
+            </div>
+        </div>
+    </div>
 </div>
-<table class="table table-striped table-hover">
-    <tbody>
-        <tr>
-            <th scope="row">Name</th>
-            <td>{{ product.name }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Manufacturer</th>
-            <td>{{ product.mfr.name }} ({{ product.mfr.shorthand }})</td>
-        </tr>
-        <tr>
-            <th scope="row">Type</th>
-            <td>{{ product.type.name }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Calories</th>
-            <td>{{ product.calories }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Protein</th>
-            <td>{{ product.protein }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Fat</th>
-            <td>{{ product.fat }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Sodium</th>
-            <td>{{ product.sodium }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Fiber</th>
-            <td>{{ product.fiber }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Carbs</th>
-            <td>{{ product.carbo }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Sugars</th>
-            <td>{{ product.sugars }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Potassium</th>
-            <td>{{ product.potass }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Vitamins</th>
-            <td>{{ product.vitamins }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Shelf</th>
-            <td>{{ product.shelf }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Weight</th>
-            <td>{{ product.weight }}</td>
-        </tr>
-        <tr>
-            <th scope="row">Cups</th>
-            <td>{{ product.cups }}</td>
-        </tr>
-    </tbody>
-</table>
-<div class="btn-group">
-    <a href="{{ path('single_product_edit', {id: product.id}) }}" class="btn btn-primary">Edit</a>
-    <a href="{{ path('single_product_delete', {id: product.id}) }}" class="btn btn-danger">Delete</a>
+
+<div class="surface-card p-3 p-md-4">
+    <div class="nutrition-label">
+        <div class="nf-title">Nutrition Facts</div>
+        <div class="nf-subtitle">Cereal profile for {{ product.name }}</div>
+        <div class="nf-divider-thick"></div>
+
+        <div class="d-flex justify-content-between small mb-1">
+            <span><strong>Manufacturer:</strong> {{ product.mfr.name }} ({{ product.mfr.shorthand }})</span>
+            <span><strong>Type:</strong> {{ product.type.name }}</span>
+        </div>
+
+        <div class="nf-divider"></div>
+        <div class="nf-row">
+            <strong>Calories</strong>
+            <span class="nf-value"><strong>{{ product.calories }}</strong></span>
+        </div>
+
+        <div class="nf-divider-thick"></div>
+        <div class="nf-dv-head">% Daily Value*</div>
+
+        <div class="nf-row">
+            <strong>Total Fat</strong>
+            <span class="nf-right">
+                <span class="nf-value">{{ product.fat }} g</span>
+                <span class="nf-dv">{{ dvFat }}%</span>
+            </span>
+        </div>
+        <div class="nf-row">
+            <strong>Sodium</strong>
+            <span class="nf-right">
+                <span class="nf-value">{{ product.sodium }} mg</span>
+                <span class="nf-dv">{{ dvSodium }}%</span>
+            </span>
+        </div>
+        <div class="nf-row">
+            <strong>Total Carbohydrate</strong>
+            <span class="nf-right">
+                <span class="nf-value">{{ product.carbo }} g</span>
+                <span class="nf-dv">{{ dvCarbo }}%</span>
+            </span>
+        </div>
+        <div class="nf-row">
+            <strong>Dietary Fiber</strong>
+            <span class="nf-right">
+                <span class="nf-value">{{ product.fiber }} g</span>
+                <span class="nf-dv">{{ dvFiber }}%</span>
+            </span>
+        </div>
+        <div class="nf-row">
+            <strong>Total Sugars</strong>
+            <span class="nf-right">
+                <span class="nf-value">{{ product.sugars }} g</span>
+                <span class="nf-dv">--</span>
+            </span>
+        </div>
+        <div class="nf-row">
+            <strong>Protein</strong>
+            <span class="nf-right">
+                <span class="nf-value">{{ product.protein }} g</span>
+                <span class="nf-dv">{{ dvProtein }}%</span>
+            </span>
+        </div>
+
+        <div class="nf-divider-thick"></div>
+
+        <div class="nf-row">
+            <strong>Potassium</strong>
+            <span class="nf-right">
+                <span class="nf-value">{{ product.potass ?? 0 }} mg</span>
+                <span class="nf-dv">{{ dvPotassium }}%</span>
+            </span>
+        </div>
+        <div class="nf-row">
+            <strong>Vitamins</strong>
+            <span class="nf-right">
+                <span class="nf-value">{{ product.vitamins }}%</span>
+                <span class="nf-dv">{{ product.vitamins }}%</span>
+            </span>
+        </div>
+
+        <div class="nf-divider"></div>
+        <div class="nf-facts-footnote">
+            Shelf {{ product.shelf }} | Weight {{ product.weight }} oz | Cups {{ product.cups }}
+        </div>
+        <div class="nf-facts-footnote">
+            *% Daily Value shown with US FDA reference values (2,000 calorie diet). EU labeling uses RI values and different rules.
+        </div>
+    </div>
 </div>
 
 {% endblock %}
