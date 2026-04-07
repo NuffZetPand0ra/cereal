@@ -16,7 +16,7 @@ class Manufacturer
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 1, unique: true)]
+    #[ORM\Column(length: 3, unique: true)]
     private ?string $shorthand = null;
 
     public function getId(): ?int

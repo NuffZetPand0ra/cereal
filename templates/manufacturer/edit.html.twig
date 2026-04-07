@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% set isEdit = manufacturer is not null and manufacturer.id is defined and manufacturer.id %}
+
+{% block title %}{{ isEdit ? 'Edit Manufacturer' : 'Create Manufacturer' }}{% endblock %}
+
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('product_index') }}">Products</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('manufacturer_index') }}">Manufacturers</a></li>
+            <li class="breadcrumb-item active">{{ isEdit ? 'Edit' : 'Create' }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block body %}
+<section class="hero-band mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h2 class="h4 mb-1">{{ isEdit ? 'Edit manufacturer' : 'Create manufacturer' }}</h2>
+            <div class="text-body-secondary">Manage supplier names and one-letter shorthand codes.</div>
+        </div>
+        {% if isEdit %}
+            <span class="stat-chip">#{{ manufacturer.id }}</span>
+        {% endif %}
+    </div>
+</section>
+
+<form method="post" action="{{ path('manufacturer_save') }}" class="surface-card p-3 p-md-4">
+    <input type="hidden" name="id" value="{{ isEdit ? manufacturer.id : '' }}">
+
+    <div class="row g-3">
+        <div class="col-12 col-md-8">
+            <label for="name-input" class="form-label">Manufacturer name</label>
+            <input id="name-input" name="name" type="text" class="form-control" value="{{ isEdit ? manufacturer.name : '' }}" required minlength="2" maxlength="255" placeholder="Kellogg's">
+        </div>
+        <div class="col-12 col-md-4">
+            <label for="shorthand-input" class="form-label">Shorthand</label>
+            <input id="shorthand-input" name="shorthand" type="text" class="form-control text-uppercase" value="{{ isEdit ? manufacturer.shorthand : '' }}" required minlength="1" maxlength="3" placeholder="KEL" autocomplete="off">
+            <div id="shorthand-feedback" class="form-text"></div>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex flex-wrap gap-2">
+        <button type="submit" class="btn btn-success">{{ isEdit ? 'Save changes' : 'Create manufacturer' }}</button>
+        <a href="{{ path('manufacturer_index') }}" class="btn btn-outline-soft">Back</a>
+        {% if isEdit %}
+            <a href="{{ path('single_manufacturer_delete', {'id': manufacturer.id}) }}" class="btn btn-danger-soft" onclick="return confirm('Delete {{ manufacturer.name|e('js') }}? This action cannot be undone.');">Delete</a>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}
+
+{% block js %}
+<script>
+(function () {
+    const input    = document.getElementById('shorthand-input');
+    const feedback = document.getElementById('shorthand-feedback');
+    const checkUrl = {{ path('manufacturer_check_shorthand') | json_encode | raw }};
+    const excludeId = {{ isEdit ? manufacturer.id : 0 }};
+    let debounceTimer;
+
+    function setFeedback(state, message) {
+        input.classList.remove('is-valid', 'is-invalid');
+        feedback.className = 'form-text';
+        switch (state) {
+            case 'checking':
+                feedback.textContent = 'Checking\u2026';
+                break;
+            case 'ok':
+                input.classList.add('is-valid');
+                feedback.classList.add('text-success');
+                feedback.textContent = message;
+                break;
+            case 'error':
+                input.classList.add('is-invalid');
+                feedback.classList.add('text-danger');
+                feedback.textContent = message;
+                break;
+            default:
+                feedback.textContent = 'Single character code.';
+        }
+    }
+
+    setFeedback('idle');
+
+    input.addEventListener('input', function () {
+        const val = this.value.trim().toUpperCase();
+        clearTimeout(debounceTimer);
+
+        if (val.length < 1 || val.length > 3) {
+            setFeedback('idle');
+            return;
+        }
+
+        setFeedback('checking');
+
+        debounceTimer = setTimeout(function () {
+            const url = checkUrl + '?shorthand=' + encodeURIComponent(val) + '&exclude_id=' + excludeId;
+            fetch(url, { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.available) {
+                        setFeedback('ok', '\u201c' + val + '\u201d is available.');
+                    } else if (data.usedBy) {
+                        setFeedback('error', '\u201c' + val + '\u201d is already used by ' + data.usedBy + '.');
+                    } else {
+                        setFeedback('error', data.error || 'Not available.');
+                    }
+                })
+                .catch(function () {
+                    setFeedback('idle');
+                });
+        }, 300);
+    });
+})();
+</script>
+{% endblock %}

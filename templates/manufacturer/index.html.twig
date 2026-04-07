@@ -1,20 +1,51 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ManufacturerController!{% endblock %}
+{% block title %}Manufacturers{% endblock %}
+
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('product_index') }}">Products</a></li>
+            <li class="breadcrumb-item active">Manufacturers</li>
+        </ol>
+    </nav>
+{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<section class="hero-band mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h2 class="h4 mb-1">Manufacturer Catalog</h2>
+            <p class="text-body-secondary mb-2">Create and maintain cereal brands and shorthand codes.</p>
+            <span class="stat-chip">{{ manufacturers|length }} manufacturers</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-soft" href="{{ path('product_index') }}">Back to products</a>
+            <a class="btn btn-warning fw-semibold" href="{{ path('single_manufacturer_create') }}">New manufacturer</a>
+        </div>
+    </div>
+</section>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/xampp/htdocs/cereal/src/Controller/ManufacturerController.php</code></li>
-        <li>Your template at <code>C:/xampp/htdocs/cereal/templates/manufacturer/index.html.twig</code></li>
-    </ul>
-</div>
+{% if manufacturers is empty %}
+    <div class="alert alert-warning">No manufacturers yet.</div>
+{% else %}
+    <div class="surface-card p-3 p-md-4">
+        <ul class="list-unstyled mb-0 d-grid gap-2">
+            {% for manufacturer in manufacturers %}
+                <li class="product-row p-2 p-md-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                        <div>
+                            <div class="cereal-link fs-5">{{ manufacturer.name }}</div>
+                            <div class="mt-1"><span class="meta-pill">Shorthand: {{ manufacturer.shorthand }}</span></div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('single_manufacturer_edit', {'id': manufacturer.id}) }}" class="btn btn-sm btn-secondary">Edit</a>
+                            <a href="{{ path('single_manufacturer_delete', {'id': manufacturer.id}) }}" class="btn btn-sm btn-danger-soft" onclick="return confirm('Delete {{ manufacturer.name|e('js') }}? This action cannot be undone.');">Delete</a>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
 {% endblock %}

@@ -88,7 +88,10 @@
                 <span class="stat-chip">{{ products|length }} cereals</span>
             </div>
             <div>
-                <a class="btn btn-warning fw-semibold" href="{{ path('single_product_create') }}">Create cereal</a>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-outline-soft" href="{{ path('manufacturer_index') }}">Manufacturers</a>
+                    <a class="btn btn-warning fw-semibold" href="{{ path('single_product_create') }}">Create cereal</a>
+                </div>
             </div>
         </div>
     </section>
