@@ -4,6 +4,14 @@
         <meta charset="UTF-8">
         <title>{% block title %}Cereal app{% endblock %}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script>
+            (function () {
+                const savedTheme = localStorage.getItem('theme');
+                const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const theme = savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : preferredTheme;
+                document.documentElement.setAttribute('data-bs-theme', theme);
+            })();
+        </script>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -149,6 +157,19 @@
                 --bs-table-bg: transparent;
             }
 
+            .theme-toggle {
+                border: 1px solid var(--cereal-border);
+                color: var(--cereal-muted);
+                background: transparent;
+                min-width: 4.5rem;
+            }
+
+            .theme-toggle:hover {
+                border-color: #8ca6be;
+                color: var(--cereal-text);
+                background: rgba(140, 166, 190, 0.1);
+            }
+
             .nutrition-label {
                 background: #f7f7f2;
                 color: #131313;
@@ -227,6 +248,57 @@
                 margin-top: 0.45rem;
             }
 
+            html[data-bs-theme="light"] {
+                --cereal-bg: #e8eff6;
+                --cereal-surface: #ffffff;
+                --cereal-surface-soft: #f4f7fa;
+                --cereal-border: #c6d5e5;
+                --cereal-text: #1f2d3d;
+                --cereal-muted: #526478;
+                --cereal-accent-soft: #f8e8c8;
+            }
+
+            html[data-bs-theme="light"] body {
+                background:
+                    radial-gradient(circle at 10% -10%, #dbe8f5 0, transparent 45%),
+                    radial-gradient(circle at 90% -25%, #f1e8d7 0, transparent 40%),
+                    linear-gradient(165deg, #f6f9fc 0%, #edf3f9 60%, #e7edf5 100%);
+            }
+
+            html[data-bs-theme="light"] .surface-card,
+            html[data-bs-theme="light"] .hero-band,
+            html[data-bs-theme="light"] .product-row,
+            html[data-bs-theme="light"] .editor-section,
+            html[data-bs-theme="light"] .nutrition-box,
+            html[data-bs-theme="light"] .grid-card {
+                background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+                border-color: var(--cereal-border);
+                box-shadow: 0 8px 24px rgba(24, 60, 92, 0.08);
+            }
+
+            html[data-bs-theme="light"] .btn-outline-soft {
+                border-color: #b3c5d8;
+                color: #30485f;
+            }
+
+            html[data-bs-theme="light"] .btn-outline-soft:hover {
+                background: #e6eef7;
+                color: #1f3347;
+                border-color: #9bb2ca;
+            }
+
+            html[data-bs-theme="light"] .meta-pill {
+                border-color: #b9cadb;
+                color: #475f76;
+            }
+
+            html[data-bs-theme="light"] .stat-chip {
+                background: #f7dfb0;
+                color: #5f3f00;
+                border-color: #bd8a2f;
+                box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset;
+            }
+
             @media (max-width: 768px) {
                 .nutrition-grid {
                     grid-template-columns: 1fr;
@@ -238,10 +310,15 @@
     <body>
         <div class="app-shell mx-auto p-3 p-md-4 py-md-5">
         
-            <header class="d-flex align-items-center pb-3 mb-4 border-bottom border-secondary-subtle">
-                {% block header %}
-                    <h1>{{ block('title') }}</h1>
-                {% endblock %}
+            <header class="d-flex align-items-center justify-content-between gap-3 pb-3 mb-4 border-bottom border-secondary-subtle">
+                <div>
+                    {% block header %}
+                        <h1>{{ block('title') }}</h1>
+                    {% endblock %}
+                </div>
+                <button type="button" class="btn btn-sm theme-toggle" id="theme-toggle" aria-label="Toggle color theme">
+                    <span id="theme-toggle-label"></span>
+                </button>
             </header>
 
             {% block breadcrumb %}{% endblock %}
@@ -284,6 +361,36 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script>
+            (function () {
+                const toggle = document.getElementById('theme-toggle');
+                const label = document.getElementById('theme-toggle-label');
+                if (!toggle || !label) {
+                    return;
+                }
+
+                function getTheme() {
+                    return document.documentElement.getAttribute('data-bs-theme') === 'light' ? 'light' : 'dark';
+                }
+
+                function renderThemeButton() {
+                    const currentTheme = getTheme();
+                    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    label.textContent = nextTheme === 'light' ? 'Light' : 'Dark';
+                    toggle.title = 'Switch to ' + nextTheme + ' mode';
+                    toggle.setAttribute('aria-label', 'Switch to ' + nextTheme + ' mode');
+                }
+
+                toggle.addEventListener('click', function () {
+                    const nextTheme = getTheme() === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-bs-theme', nextTheme);
+                    localStorage.setItem('theme', nextTheme);
+                    renderThemeButton();
+                });
+
+                renderThemeButton();
+            })();
+        </script>
         {% block js %}
         {% endblock %}
     </body>
