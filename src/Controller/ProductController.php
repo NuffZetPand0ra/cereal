@@ -19,13 +19,48 @@ class ProductController extends AbstractController
 {
     public function index(Request $r, EntityManagerInterface $em, ProductFilterService $productFilterService): Response
     {
-        $filters = $productFilterService->parseFilters($r);
+        $filters = $productFilterService->parseFiltersFromArray($this->buildIndexFilterQuery($r));
         $products = $em->getRepository(Product::class)->findWithFilters($filters);
         return $this->render('product/index.html.twig', [
             'controller_name' => 'ProductController',
             'products' => $products,
             'filters' => $filters,
         ]);
+    }
+
+    private function buildIndexFilterQuery(Request $request): array
+    {
+        $query = $request->query;
+        $normalizedFilters = [];
+
+        $nameContains = trim((string) $query->get('name_contains', ''));
+        if ($nameContains !== '') {
+            $normalizedFilters['name'] = '%'.$nameContains.'%';
+        }
+
+        $rangeFields = ['calories', 'protein', 'sugars', 'fiber'];
+        foreach ($rangeFields as $field) {
+            $min = trim((string) $query->get($field.'_min', ''));
+            $max = trim((string) $query->get($field.'_max', ''));
+
+            if ($min !== '' && $max !== '') {
+                $normalizedFilters[$field] = $min.'..'.$max;
+            } elseif ($min !== '') {
+                $normalizedFilters[$field] = '>='.$min;
+            } elseif ($max !== '') {
+                $normalizedFilters[$field] = '<='.$max;
+            }
+        }
+
+        $sortBy = trim((string) $query->get('sort_by', 'name'));
+        $sortDirection = strtolower(trim((string) $query->get('sort_dir', 'asc')));
+        $allowedSortFields = ['name', 'calories', 'protein', 'sugars', 'fiber'];
+        if (!in_array($sortBy, $allowedSortFields, true)) {
+            $sortBy = 'name';
+        }
+        $normalizedFilters['order'] = ($sortDirection === 'desc' ? '>' : '<').$sortBy;
+
+        return $normalizedFilters;
     }
     
     public function show(int $id, EntityManagerInterface $em): Response

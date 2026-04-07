@@ -8,7 +8,11 @@ class ProductFilterService
 {
     public function parseFilters(Request $request): array
     {
-        $filters = $request->query->all();
+        return $this->parseFiltersFromArray($request->query->all());
+    }
+
+    public function parseFiltersFromArray(array $filters): array
+    {
         $supportedOperators = ['<', '>', '<=', '>=', '=', '!=', '..'];
         $parsedFilters = [];
 

@@ -5,15 +5,162 @@
         <title>{% block title %}Cereal app{% endblock %}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
         {% block styles %}
         {% endblock %}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <style>
+            :root {
+                --cereal-bg: #121923;
+                --cereal-surface: #1a2430;
+                --cereal-surface-soft: #202d3a;
+                --cereal-border: #324355;
+                --cereal-text: #dde4ec;
+                --cereal-muted: #9aabba;
+                --cereal-accent: #db9f2f;
+                --cereal-accent-soft: #3a2e14;
+                --cereal-danger: #d94f57;
+            }
+
+            body {
+                font-family: 'Archivo', sans-serif;
+                color: var(--cereal-text);
+                background:
+                    radial-gradient(circle at 20% -10%, #29384a 0, transparent 35%),
+                    radial-gradient(circle at 80% -20%, #3b311f 0, transparent 32%),
+                    linear-gradient(160deg, #0f151d 0%, var(--cereal-bg) 55%, #121a24 100%);
+            }
+
+            h1, h2, h3, h4, h5, h6 {
+                font-family: 'Space Grotesk', sans-serif;
+                letter-spacing: 0.01em;
+            }
+
+            .app-shell {
+                max-width: 1060px;
+            }
+
+            .surface-card {
+                background: linear-gradient(180deg, #1e2936 0%, #1a2430 100%);
+                border: 1px solid var(--cereal-border);
+                border-radius: 16px;
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+            }
+
+            .hero-band {
+                padding: 1.15rem 1.25rem;
+                border-radius: 16px;
+                border: 1px solid var(--cereal-border);
+                background: linear-gradient(140deg, #1f2c3a 0%, #1a2532 60%, #1e1e1a 100%);
+            }
+
+            .stat-chip {
+                display: inline-block;
+                padding: 0.3rem 0.6rem;
+                border-radius: 999px;
+                background: var(--cereal-accent-soft);
+                color: #ffd99a;
+                border: 1px solid #6f5526;
+                font-size: 0.82rem;
+                font-weight: 700;
+            }
+
+            .cereal-link {
+                color: var(--cereal-text);
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .cereal-link:hover {
+                color: #ffe5b8;
+                text-decoration: underline;
+            }
+
+            .meta-pill {
+                display: inline-block;
+                padding: 0.22rem 0.45rem;
+                border-radius: 999px;
+                border: 1px solid #425669;
+                color: var(--cereal-muted);
+                font-size: 0.78rem;
+            }
+
+            .product-row {
+                background: linear-gradient(180deg, #1a2531 0%, #192431 100%);
+                border: 1px solid var(--cereal-border);
+                border-radius: 12px;
+                transition: transform .16s ease, border-color .16s ease;
+            }
+
+            .product-row:hover {
+                transform: translateY(-2px);
+                border-color: #54708a;
+            }
+
+            .btn-outline-soft {
+                border-color: #556d84;
+                color: #bed1e4;
+            }
+
+            .btn-outline-soft:hover {
+                background: #27384a;
+                color: #e8f3ff;
+                border-color: #7896b2;
+            }
+
+            .btn-danger-soft {
+                background: #3d2024;
+                color: #ffcdd2;
+                border: 1px solid #804046;
+            }
+
+            .btn-danger-soft:hover {
+                background: #4d252a;
+                color: #ffdce0;
+            }
+
+            .nutrition-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.75rem;
+            }
+
+            .nutrition-box {
+                background: var(--cereal-surface-soft);
+                border: 1px solid var(--cereal-border);
+                border-radius: 12px;
+                padding: 0.75rem;
+            }
+
+            .nutrition-box .label {
+                color: var(--cereal-muted);
+                font-size: 0.8rem;
+            }
+
+            .nutrition-box .value {
+                font-size: 1.1rem;
+                font-weight: 700;
+                font-family: 'Space Grotesk', sans-serif;
+            }
+
+            .table {
+                --bs-table-bg: transparent;
+            }
+
+            @media (max-width: 768px) {
+                .nutrition-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
 
     </head>
     <body>
-        <div class="col-lg-8 mx-auto p-4 py-md-5">
+        <div class="app-shell mx-auto p-3 p-md-4 py-md-5">
         
-            <header class="d-flex align-items-center pb-3 mb-5 border-bottom">
+            <header class="d-flex align-items-center pb-3 mb-4 border-bottom border-secondary-subtle">
                 {% block header %}
                     <h1>{{ block('title') }}</h1>
                 {% endblock %}
@@ -25,7 +172,7 @@
                 {% block body %}{% endblock %}
             </main>
 
-            <footer class="pt-5 my-5 text-body-secondary border-top">
+            <footer class="pt-4 my-5 text-body-secondary border-top border-secondary-subtle">
                 {% block footer %}
                     <p>Data appearing in this app have not been verified.</p>
                 {% endblock %}
