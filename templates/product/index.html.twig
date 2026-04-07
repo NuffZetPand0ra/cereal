@@ -135,7 +135,7 @@
                     <div class="d-flex gap-2">
                         <a href="{{ path('single_product_show', {'id': product.id}) }}" class="btn btn-sm btn-outline-soft">View</a>
                         <a href="{{ path('single_product_edit', {'id': product.id}) }}" class="btn btn-sm btn-secondary">Edit</a>
-                        <a href="{{ path('single_product_delete', {'id': product.id}) }}" class="btn btn-sm btn-danger-soft">Delete</a>
+                        <a href="{{ path('single_product_delete', {'id': product.id}) }}" class="btn btn-sm btn-danger-soft" onclick="return confirm('Delete {{ product.name|e('js') }}? This action cannot be undone.');">Delete</a>
                     </div>
                 </div>
             </li>

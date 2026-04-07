@@ -149,6 +149,84 @@
                 --bs-table-bg: transparent;
             }
 
+            .nutrition-label {
+                background: #f7f7f2;
+                color: #131313;
+                border: 2px solid #111;
+                border-radius: 8px;
+                padding: 0.9rem;
+                box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+            }
+
+            .nutrition-label .nf-title {
+                font-family: 'Space Grotesk', sans-serif;
+                font-size: 1.6rem;
+                line-height: 1;
+                margin-bottom: 0.2rem;
+            }
+
+            .nutrition-label .nf-subtitle {
+                font-size: 0.8rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .nutrition-label .nf-divider-thick {
+                border-top: 7px solid #111;
+                margin: 0.35rem 0;
+            }
+
+            .nutrition-label .nf-divider {
+                border-top: 1px solid #111;
+                margin: 0;
+            }
+
+            .nutrition-label .nf-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                font-size: 0.92rem;
+                padding: 0.25rem 0;
+                border-top: 1px solid #111;
+            }
+
+            .nutrition-label .nf-row strong {
+                font-weight: 700;
+            }
+
+            .nutrition-label .nf-row .nf-value {
+                text-align: right;
+                margin-left: 1rem;
+            }
+
+            .nutrition-label .nf-row .nf-right {
+                display: inline-flex;
+                align-items: baseline;
+                gap: 0.85rem;
+                margin-left: 1rem;
+                min-width: 8.5rem;
+                justify-content: flex-end;
+            }
+
+            .nutrition-label .nf-dv-head {
+                display: flex;
+                justify-content: flex-end;
+                font-size: 0.75rem;
+                font-weight: 700;
+                margin: 0.1rem 0 0.2rem;
+            }
+
+            .nutrition-label .nf-dv {
+                min-width: 2.8rem;
+                text-align: right;
+                font-weight: 700;
+            }
+
+            .nutrition-label .nf-facts-footnote {
+                font-size: 0.72rem;
+                color: #333;
+                margin-top: 0.45rem;
+            }
+
             @media (max-width: 768px) {
                 .nutrition-grid {
                     grid-template-columns: 1fr;
