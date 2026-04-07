@@ -6,10 +6,12 @@ use App\Entity\Manufacturer;
 use App\Entity\Product;
 use App\Entity\ProductImage;
 use App\Entity\ProductType;
+use App\Service\CerealIdeaAssistant;
 use App\Service\ProductFilterService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -17,6 +19,23 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProductController extends AbstractController
 {
+    public function aiDraft(Request $request, CerealIdeaAssistant $assistant): JsonResponse
+    {
+        $payload = json_decode($request->getContent(), true);
+        if (!is_array($payload)) {
+            return $this->json(['error' => 'Invalid JSON payload.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $name = trim((string) ($payload['name'] ?? ''));
+        $idea = trim((string) ($payload['idea'] ?? ''));
+
+        if ($name === '' || $idea === '') {
+            return $this->json(['error' => 'Both name and idea are required.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return $this->json($assistant->suggestDraft($name, $idea));
+    }
+
     public function index(Request $r, EntityManagerInterface $em, ProductFilterService $productFilterService): Response
     {
         $filters = $productFilterService->parseFiltersFromArray($this->buildIndexFilterQuery($r));

@@ -101,3 +101,9 @@ api_list_products:
     path: /api/products
     controller: App\Controller\ProductApiController::list
     methods: ['GET']
+
+api_ai_cereal_draft:
+    path: /api/ai/cereal-draft
+    controller: App\Controller\ProductController::aiDraft
+    methods: ['POST']
+    format: json

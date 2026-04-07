@@ -56,6 +56,19 @@
             padding-top: 1rem;
             margin-top: 1rem;
         }
+
+        .ai-preview {
+            border: 1px solid var(--cereal-border);
+            border-radius: 12px;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .ai-preview img {
+            max-width: 100%;
+            border-radius: 10px;
+            border: 1px solid var(--cereal-border);
+        }
     </style>
 {% endblock %}
 
@@ -101,6 +114,35 @@
                 </div>
             </div>
         </section>
+
+        {% if not isEdit %}
+            <section class="editor-section">
+                <h3>AI Assistant (First Pass)</h3>
+                <div class="row g-3">
+                    <div class="col-12 col-md-9">
+                        <label for="idea-input" class="form-label">Vague idea</label>
+                        <input id="idea-input" type="text" class="form-control" placeholder="e.g. tropical high-protein cereal for busy mornings">
+                        <div class="form-text">Provide the cereal name and a rough concept, then generate nutrient + image suggestions.</div>
+                    </div>
+                    <div class="col-12 col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-warning w-100" id="ai-suggest-btn">Suggest with AI</button>
+                    </div>
+                    <div class="col-12">
+                        <div id="ai-status" class="editor-meta">No AI draft generated yet.</div>
+                    </div>
+                    <div class="col-12" id="ai-preview-wrap" style="display:none;">
+                        <div class="ai-preview">
+                            <div class="mb-2"><strong>Suggested image concept</strong></div>
+                            <img id="ai-image-preview" alt="AI cereal concept preview">
+                            <div class="mt-2 small">
+                                <a id="ai-image-link" href="#" target="_blank" rel="noopener">Open suggested image</a>
+                            </div>
+                            <div class="mt-2 small text-body-secondary" id="ai-image-prompt"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
 
         <section class="editor-section">
             <h3>Macronutrients</h3>
@@ -283,6 +325,13 @@
                 name: document.getElementById('name-input'),
                 mfr: document.getElementById('mfr-input'),
                 type: document.getElementById('type-input'),
+                idea: document.getElementById('idea-input'),
+                aiSuggestButton: document.getElementById('ai-suggest-btn'),
+                aiStatus: document.getElementById('ai-status'),
+                aiPreviewWrap: document.getElementById('ai-preview-wrap'),
+                aiImagePreview: document.getElementById('ai-image-preview'),
+                aiImageLink: document.getElementById('ai-image-link'),
+                aiImagePrompt: document.getElementById('ai-image-prompt'),
                 calories: document.getElementById('calories-input'),
                 fat: document.getElementById('fat-input'),
                 sodium: document.getElementById('sodium-input'),
@@ -321,6 +370,8 @@
                 dvProtein: document.getElementById('preview-dv-protein'),
                 dvPotass: document.getElementById('preview-dv-potass')
             };
+
+            const aiDraftUrl = {{ path('api_ai_cereal_draft')|json_encode|raw }};
 
             const usDv = { fat: 78, sodium: 2300, carbo: 275, fiber: 28, protein: 50, potass: 4700 };
 
@@ -385,6 +436,72 @@
                 input.addEventListener('input', updatePreview);
                 input.addEventListener('change', updatePreview);
             });
+
+            function applyAiNutrients(nutrients) {
+                const map = ['calories', 'protein', 'fat', 'sodium', 'fiber', 'carbo', 'sugars', 'potass', 'vitamins', 'shelf', 'weight', 'cups'];
+                map.forEach(function (key) {
+                    if (!refs[key] || nutrients[key] === undefined || nutrients[key] === null) {
+                        return;
+                    }
+                    refs[key].value = String(nutrients[key]);
+                });
+            }
+
+            async function runAiDraft() {
+                if (!refs.aiSuggestButton || !refs.aiStatus || !refs.idea) {
+                    return;
+                }
+
+                const name = refs.name.value.trim();
+                const idea = refs.idea.value.trim();
+
+                if (!name || !idea) {
+                    refs.aiStatus.textContent = 'Please provide both cereal name and a vague idea.';
+                    return;
+                }
+
+                refs.aiSuggestButton.disabled = true;
+                refs.aiStatus.textContent = 'Generating AI draft...';
+
+                try {
+                    const response = await fetch(aiDraftUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ name: name, idea: idea })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) {
+                        refs.aiStatus.textContent = data.error || 'Could not generate draft right now.';
+                        return;
+                    }
+
+                    applyAiNutrients(data.nutrients || {});
+                    updatePreview();
+
+                    const source = data.source ? String(data.source) : 'assistant';
+                    const notes = data.notes ? String(data.notes) : '';
+                    refs.aiStatus.textContent = 'Draft applied from ' + source + (notes ? ' - ' + notes : '.');
+
+                    if (data.image && data.image.url && refs.aiPreviewWrap && refs.aiImagePreview && refs.aiImageLink && refs.aiImagePrompt) {
+                        refs.aiPreviewWrap.style.display = '';
+                        refs.aiImagePreview.src = String(data.image.url);
+                        refs.aiImageLink.href = String(data.image.url);
+                        refs.aiImagePrompt.textContent = data.image.prompt ? ('Prompt: ' + String(data.image.prompt)) : '';
+                    }
+                } catch (_error) {
+                    refs.aiStatus.textContent = 'AI draft request failed. Please try again.';
+                } finally {
+                    refs.aiSuggestButton.disabled = false;
+                }
+            }
+
+            if (refs.aiSuggestButton) {
+                refs.aiSuggestButton.addEventListener('click', runAiDraft);
+            }
 
             updatePreview();
         })();
