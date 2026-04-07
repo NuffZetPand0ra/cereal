@@ -36,6 +36,36 @@ product_save:
     controller: App\Controller\ProductController::save
     methods: ['POST']
 
+manufacturer_index:
+    path: /manufacturers
+    controller: App\Controller\ManufacturerController::index
+    methods: ['GET']
+
+single_manufacturer_create:
+    path: /manufacturer/create
+    controller: App\Controller\ManufacturerController::create
+    methods: ['GET']
+
+single_manufacturer_edit:
+    path: /manufacturer/{id}/edit
+    controller: App\Controller\ManufacturerController::edit
+    methods: ['GET']
+
+manufacturer_save:
+    path: /manufacturer/save
+    controller: App\Controller\ManufacturerController::save
+    methods: ['POST']
+
+single_manufacturer_delete:
+    path: /manufacturer/{id}/delete
+    controller: App\Controller\ManufacturerController::delete
+    methods: ['GET|POST|DELETE']
+
+manufacturer_check_shorthand:
+    path: /manufacturer/check-shorthand
+    controller: App\Controller\ManufacturerController::checkShorthand
+    methods: ['GET']
+
 # Api routes
 api_single_product_show:
     path: /api/product/{id}
