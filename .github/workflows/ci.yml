@@ -20,6 +20,9 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       -
+        name: Ensure optional local env file exists
+        run: touch .env.local
+      -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       -
@@ -61,6 +64,12 @@ jobs:
         name: Doctrine Schema Validator
         if: false # Remove this line if Doctrine ORM is installed
         run: docker compose exec -T php bin/console -e test doctrine:schema:validate
+      -
+        name: Dump container diagnostics on failure
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --no-color --tail=300
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest
