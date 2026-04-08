@@ -29,8 +29,8 @@ class ProductController extends AbstractController
         $name = trim((string) ($payload['name'] ?? ''));
         $idea = trim((string) ($payload['idea'] ?? ''));
 
-        if ($name === '' || $idea === '') {
-            return $this->json(['error' => 'Both name and idea are required.'], Response::HTTP_BAD_REQUEST);
+        if ($idea === '') {
+            return $this->json(['error' => 'Idea is required.'], Response::HTTP_BAD_REQUEST);
         }
 
         return $this->json($assistant->suggestDraft($name, $idea));

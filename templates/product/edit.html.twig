@@ -457,8 +457,8 @@
                 const name = refs.name.value.trim();
                 const idea = refs.idea.value.trim();
 
-                if (!name || !idea) {
-                    refs.aiStatus.textContent = 'Please provide both cereal name and a vague idea.';
+                if (!idea) {
+                    refs.aiStatus.textContent = 'Please provide at least a vague idea.';
                     return;
                 }
 
@@ -482,6 +482,11 @@
                     }
 
                     applyAiNutrients(data.nutrients || {});
+
+                    if (!name && data.suggestedName && refs.name) {
+                        refs.name.value = String(data.suggestedName);
+                    }
+
                     updatePreview();
 
                     const source = data.source ? String(data.source) : 'assistant';

@@ -9,24 +9,38 @@ class CerealIdeaAssistant
      */
     public function suggestDraft(string $name, string $idea): array
     {
-        $fallback = $this->heuristicSuggestion($name, $idea);
+        $providedName = trim($name);
+        $idea = trim($idea);
+        $generatedName = $providedName !== '' ? $providedName : $this->suggestNameFromIdea($idea);
 
-        $apiKey = trim((string) ($_ENV['OPENAI_API_KEY'] ?? $_SERVER['OPENAI_API_KEY'] ?? ''));
+        $fallback = $this->heuristicSuggestion($generatedName, $idea);
+
+        $apiKey = trim((string) (getenv('OPENAI_API_KEY') ?: ($_ENV['OPENAI_API_KEY'] ?? $_SERVER['OPENAI_API_KEY'] ?? '')));
         if ($apiKey === '') {
-            return $fallback;
+            return $this->withSuggestedName($fallback, $providedName, $generatedName);
         }
 
-        $llmSuggestion = $this->openAiSuggestion($name, $idea, $apiKey);
+        $llmSuggestion = $this->openAiSuggestion($providedName, $idea, $apiKey);
         if ($llmSuggestion === null) {
-            return $fallback;
+            return $this->withSuggestedName($fallback, $providedName, $generatedName);
         }
 
-        return [
+        $resolvedName = $providedName;
+        if ($resolvedName === '') {
+            $resolvedName = trim((string) ($llmSuggestion['suggestedName'] ?? ''));
+            if ($resolvedName === '') {
+                $resolvedName = $generatedName;
+            }
+        }
+
+        $result = [
             'source' => 'openai',
             'nutrients' => $this->sanitizeNutrients($llmSuggestion['nutrients'] ?? []),
-            'image' => $this->buildImageSuggestion($name, $idea, (string) ($llmSuggestion['imagePrompt'] ?? '')),
+            'image' => $this->buildImageSuggestion($resolvedName, $idea, (string) ($llmSuggestion['imagePrompt'] ?? ''), $apiKey),
             'notes' => (string) ($llmSuggestion['notes'] ?? ''),
         ];
+
+        return $this->withSuggestedName($result, $providedName, $resolvedName);
     }
 
     /**
@@ -101,11 +115,12 @@ class CerealIdeaAssistant
 
         $prompt = [
             'You are helping create a cereal product draft.',
-            'Return strict JSON only with keys: nutrients, imagePrompt, notes.',
+            'Return strict JSON only with keys: nutrients, imagePrompt, notes, suggestedName.',
             'nutrients must include numeric fields: calories, protein, fat, sodium, fiber, carbo, sugars, potass, vitamins, shelf, weight, cups.',
             'Use realistic per-serving values, all non-negative.',
-            sprintf('Cereal name: %s', $name),
+            $name === '' ? 'Cereal name: (not provided)' : sprintf('Cereal name: %s', $name),
             sprintf('Idea: %s', $idea),
+            'If cereal name is not provided, suggest a short marketable name in suggestedName. Otherwise set suggestedName to an empty string.',
         ];
 
         $payload = [
@@ -175,7 +190,7 @@ class CerealIdeaAssistant
     /**
      * @return array<string, string>
      */
-    private function buildImageSuggestion(string $name, string $idea, string $prompt): array
+    private function buildImageSuggestion(string $name, string $idea, string $prompt, ?string $apiKey = null): array
     {
         $cleanPrompt = trim($prompt);
         if ($cleanPrompt === '') {
@@ -184,6 +199,16 @@ class CerealIdeaAssistant
                 $name,
                 $idea
             );
+        }
+
+        if ($apiKey !== null && $apiKey !== '') {
+            $openAiImageUrl = $this->openAiImageSuggestion($cleanPrompt, $apiKey);
+            if ($openAiImageUrl !== null) {
+                return [
+                    'prompt' => $cleanPrompt,
+                    'url' => $openAiImageUrl,
+                ];
+            }
         }
 
         $seed = abs(crc32(strtolower($name.'|'.$idea)));
@@ -195,6 +220,47 @@ class CerealIdeaAssistant
         ];
     }
 
+    private function openAiImageSuggestion(string $prompt, string $apiKey): ?string
+    {
+        if (!function_exists('curl_init')) {
+            return null;
+        }
+
+        $payload = [
+            'model' => 'gpt-image-1',
+            'prompt' => $prompt,
+            'size' => '1024x1024',
+            'quality' => 'low',
+        ];
+
+        $ch = curl_init('https://api.openai.com/v1/images/generations');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer '.$apiKey,
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+
+        $response = curl_exec($ch);
+        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        curl_close($ch);
+
+        if (!is_string($response) || $status < 200 || $status >= 300) {
+            return null;
+        }
+
+        $decoded = json_decode($response, true);
+        if (!is_array($decoded)) {
+            return null;
+        }
+
+        $url = $decoded['data'][0]['url'] ?? null;
+
+        return is_string($url) && $url !== '' ? $url : null;
+    }
+
     private function sanitizeInt(mixed $value): int
     {
         return max(0, (int) round((float) $value));
@@ -203,6 +269,40 @@ class CerealIdeaAssistant
     private function sanitizeFloat(mixed $value): float
     {
         return max(0.0, round((float) $value, 2));
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     * @return array<string, mixed>
+     */
+    private function withSuggestedName(array $result, string $providedName, string $suggestedName): array
+    {
+        if ($providedName !== '') {
+            return $result;
+        }
+
+        $result['suggestedName'] = $suggestedName;
+
+        return $result;
+    }
+
+    private function suggestNameFromIdea(string $idea): string
+    {
+        $normalized = preg_replace('/[^a-z0-9]+/i', ' ', strtolower($idea));
+        $normalized = is_string($normalized) ? trim($normalized) : '';
+
+        if ($normalized === '') {
+            return 'Morning Crunch';
+        }
+
+        $words = array_values(array_filter(explode(' ', $normalized), static function (string $word): bool {
+            return strlen($word) >= 3 && !in_array($word, ['with', 'from', 'for', 'that', 'this', 'your', 'and', 'the'], true);
+        }));
+
+        $first = $words[0] ?? 'Morning';
+        $second = $words[1] ?? 'Crunch';
+
+        return ucfirst($first).' '.ucfirst($second);
     }
 
     /**
