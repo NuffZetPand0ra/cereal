@@ -1,62 +1,157 @@
-# Cereal Product Management
+# Cereal
 
-This project is a web application for managing cereal products. It allows users to view, edit, and manage cereal product details.
+A Symfony 7 application for managing cereal products and manufacturers, with:
 
-## Prerequisites
+- Web UI for CRUD operations
+- JSON API for products
+- AI-assisted cereal draft generation (name, nutrients, and image suggestion)
+- Docker-based local development with FrankenPHP + Postgres
 
-Before you begin, ensure you have met the following requirements:
-- You have installed [Docker](https://www.docker.com/get-started)
-- You have a web browser installed
+## Tech Stack
 
-## Installation
+- PHP 8.2+
+- Symfony 7.1
+- Doctrine ORM + Doctrine Migrations
+- Twig
+- FrankenPHP (Caddy)
+- PostgreSQL 16
+- PHPUnit 9
 
-To set up and run this project locally, follow these steps:
+## Requirements
 
-1. **Clone the repository**:
-	```sh
-	git clone https://github.com/NuffZetPand0ra/cereal.git
-	cd cereal-product-management
-	```
+- Docker + Docker Compose
+- A browser for the web UI
 
-2. **Build the Docker images**:
-	```sh
-	docker-compose build
-	```
+## Quick Start
 
-3. **Start the Docker containers**:
-	```sh
-	docker compose up --pull always -d --wait
-	```
+1. Clone and enter the project:
 
-4. **Run database migration to set up schema**:
-    ```sh
-    docker exec cereal-php-1 php bin/console doctrine:migrations:migrate --no-interaction
-    ```
+```sh
+git clone https://github.com/NuffZetPand0ra/cereal.git
+cd cereal
+```
 
-5. **(Optional) Load in the data fixtures to populate the database with starting data**:
-    ```sh
-    docker exec cereal-php-1 php bin/console doctrine:fixtures:load --no-interaction
-    ```
+2. Create a local env file required by compose override:
 
-## Usage
+```sh
+touch .env.local
+```
 
-Once the Docker containers are up and running, open your web browser and navigate to:
+3. Start the stack:
 
-http://localhost/products
+```sh
+docker compose up --pull always -d --wait
+```
 
-You should see the home page of the Cereal Product Management application.
+4. Run migrations:
 
-## Contributing
+```sh
+docker compose exec -T php php bin/console doctrine:migrations:migrate --no-interaction
+```
 
-Contributions are welcome! Please follow these steps to contribute:
+5. Optional: load fixtures:
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature-branch`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add some feature'`)
-5. Push to the branch (`git push origin feature-branch`)
-6. Create a Pull Request
+```sh
+docker compose exec -T php php bin/console doctrine:fixtures:load --no-interaction
+```
+
+6. Open the app:
+
+- Products: http://localhost/products
+- Manufacturers: http://localhost/manufacturers
+
+## AI Draft Assistant
+
+The product edit/create page includes an AI draft button that can generate:
+
+- Nutrition values
+- Product image suggestion URL
+- Suggested product name when name is not provided
+
+Endpoint:
+
+- POST /api/ai/cereal-draft
+
+Request body:
+
+```json
+{
+  "name": "",
+  "idea": "Chocolate berry cereal for kids"
+}
+```
+
+Notes:
+
+- `idea` is required
+- `name` is optional
+- If `name` is omitted, the response may include `suggestedName`
+
+### OpenAI Integration
+
+Set `OPENAI_API_KEY` in `.env.local` to enable LLM-based suggestions.
+
+Without an API key, the app falls back to deterministic heuristic suggestions.
+
+Example `.env.local`:
+
+```dotenv
+OPENAI_API_KEY=your_key_here
+```
+
+## API Overview
+
+- GET /api/products
+- GET /api/product/{id}
+- POST /api/product
+- PUT /api/product/{id}
+- PATCH /api/product/{id}
+- DELETE /api/product/{id}
+- POST /api/ai/cereal-draft
+
+## Tests
+
+Run all tests inside the container:
+
+```sh
+docker compose exec -T php php ./vendor/bin/phpunit
+```
+
+Run focused tests:
+
+```sh
+docker compose exec -T php php ./vendor/bin/phpunit tests/Service/CerealIdeaAssistantTest.php
+```
+
+## CI
+
+GitHub Actions runs on pull requests and includes:
+
+- Docker image build
+- Service startup and HTTP reachability check
+- PHPUnit execution
+- Automatic container diagnostics dump on failure
+
+## Useful Commands
+
+Start:
+
+```sh
+docker compose up --pull always -d --wait
+```
+
+Stop:
+
+```sh
+docker compose down
+```
+
+Logs:
+
+```sh
+docker compose logs -f
+```
 
 ## License
 
-This project is licensed under the MIT License.
+MIT
